@@ -27,7 +27,7 @@ function App() {
           }
 
           return {
-            title: `${booking.RoomName} - ${booking.Name} - ${booking.Status}`,
+            title: `${booking.RoomName} - ${booking.Name} - ${booking.Phone} - ${booking.Reason}`,
             start,
             end,
             status: booking.Status
@@ -41,6 +41,25 @@ function App() {
       });
   }, []);
 
+  const eventStyleGetter = (event) => {
+    let backgroundColor = '';
+    if (event.status === 'booking') {
+      backgroundColor = 'green';
+    } else if (event.status === 'reject') {
+      backgroundColor = 'red';
+    } 
+
+    return {
+      style: {
+        backgroundColor,
+        borderRadius: '0px',
+        color: 'black',
+        border: '0px',
+        
+      }
+    };
+  };
+
   return (
     <div className="App">
       <h1>Booking Calendar</h1>
@@ -51,6 +70,7 @@ function App() {
         endAccessor="end"
         titleAccessor="title"
         style={{ height: 500 }}
+        eventPropGetter={eventStyleGetter}
       />
     </div>
   );

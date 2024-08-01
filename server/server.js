@@ -31,7 +31,7 @@ app.post('/api/test', (req, res) => {
 // Route to fetch bookings
 app.get('/api/bookings', (req, res) => {
   const query = `
-    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Status, lr.RoomName
+    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName
     FROM orderbooking ob
     JOIN listroom lr ON ob.RoomID = lr.RoomID
   `;
