@@ -34,6 +34,7 @@ app.get('/api/bookings', (req, res) => {
     SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName
     FROM orderbooking ob
     JOIN listroom lr ON ob.RoomID = lr.RoomID
+    WHERE ob.Status = 'wait'
   `;
   connection.query(query, (error, results) => {
     if (error) {
@@ -58,19 +59,19 @@ app.get('/api/rooms', (req, res) => {
 
 // Route to create a new booking
 app.post('/api/bookings', (req, res) => {
-  const { RoomID, Date, Start, End, Name } = req.body;
+  const { RoomID, Date, Start, End, Name, Phone, Reason } = req.body;
   
   // Validate the input data
-  if (!RoomID || !Date || !Start || !End || !Name) {
+  if (!RoomID || !Date || !Start || !End || !Name || !Phone || !Reason) {
     return res.status(400).send('Missing required fields');
   }
 
   // Construct the SQL query
-  const query = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name) VALUES (?, ?, ?, ?, ?, ?)';
+  const query = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
   const status = 'wait'; // Fixed status
 
   // Execute the query
-  connection.query(query, [RoomID, Date, Start, End, status, Name], (error, results) => {
+  connection.query(query, [RoomID, Date, Start, End, status, Name, Phone, Reason], (error, results) => {
     if (error) {
       console.error('Error inserting booking:', error);
       return res.status(500).json({ error: 'Error creating booking', details: error });

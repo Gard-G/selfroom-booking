@@ -8,6 +8,8 @@ const BookingPage = () => {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [reason, setReason] = useState('');
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/rooms')
@@ -31,7 +33,9 @@ const BookingPage = () => {
       Date: date,
       Start: startDateTime,
       End: endDateTime,
-      Name: name
+      Name: name,
+      Phone: phone,
+      Reason: reason
     })
     .then(response => {
       alert('Booking created successfully');
@@ -90,6 +94,24 @@ const BookingPage = () => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+          />
+        </label>
+        <br />
+        <label>
+          Phone:
+          <input
+            type="text"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+        </label>
+        <br />
+        <label>
+          Reason:
+          <input
+            type="text"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
           />
         </label>
         <br />
