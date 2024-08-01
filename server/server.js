@@ -34,7 +34,6 @@ app.get('/api/bookings', (req, res) => {
     SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName
     FROM orderbooking ob
     JOIN listroom lr ON ob.RoomID = lr.RoomID
-    WHERE ob.Status = 'wait'
   `;
   connection.query(query, (error, results) => {
     if (error) {
@@ -42,6 +41,47 @@ app.get('/api/bookings', (req, res) => {
       return;
     }
     res.json(results);
+  });
+});
+
+// Route to fetch bookings with "wait" status
+app.get('/api/wait-bookings', (req, res) => {
+  const query = `
+    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName
+    FROM orderbooking ob
+    JOIN listroom lr ON ob.RoomID = lr.RoomID
+    WHERE ob.Status = 'wait'
+  `;
+  connection.query(query, (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching data from database');
+      return;
+    }
+    
+    // Format the date fields BEFORE sending the response
+    const formattedResults = results.map(booking => ({
+      ...booking,
+      Date: new Date(booking.Date).toLocaleDateString(), // Formatting Date
+      Start: new Date(booking.Start).toLocaleTimeString(), // Formatting Start Time
+      End: new Date(booking.End).toLocaleTimeString() // Formatting End Time
+    }));
+    
+    // Send the formatted results as the response
+    res.json(formattedResults);  // This is the fixed point
+  });
+});
+
+// Route to update booking status
+app.put('/api/update-booking-status', (req, res) => {
+  const { OrderBooking, newStatus } = req.body;
+
+  const query = 'UPDATE orderbooking SET Status = ? WHERE OrderBooking = ?';
+  connection.query(query, [newStatus, OrderBooking], (error, results) => {
+    if (error) {
+      res.status(500).send('Error updating booking status');
+      return;
+    }
+    res.status(200).send('Booking status updated successfully');
   });
 });
 
