@@ -49,8 +49,14 @@ const ApprovePage = () => {
               <td>{booking.Phone}</td>
               <td>{booking.Reason}</td>
               <td>
-                <button onClick={() => handleUpdateStatus(booking.OrderBooking, 'booking')}>Approve</button>
-                <button onClick={() => handleUpdateStatus(booking.OrderBooking, 'reject')}>Reject</button>
+                <button onClick={() => handleUpdateStatus(booking.OrderBooking, 'booking')}
+                style={{ backgroundColor: 'green', color: 'white', marginLeft: '5px' }}
+                >Approve
+                </button>
+                <button onClick={() => handleUpdateStatus(booking.OrderBooking, 'reject')}
+                style={{ backgroundColor: 'red', color: 'white', marginLeft: '5px', marginRight: '5px'}}
+                >Reject
+                </button>
               </td>
             </tr>
           ))}
