@@ -6,7 +6,7 @@ import App from './App';
 import BookingPage from './BookingPage';
 import ApprovePage from './ApprovePage';
 import './index.css';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
