@@ -50,9 +50,10 @@ const BookingPage = () => {
   return (
     <div>
       <h1>Booking Page</h1>
+      <div className="container p-5 my-5 bg-dark text-white">
       <br />
       <form onSubmit={handleSubmit}>
-        <label>
+        <label style={{marginRight: '15px'}}>
           Room:
           <select value={roomID} onChange={(e) => setRoomID(e.target.value)}>
             <option value="">Select Room</option>
@@ -61,8 +62,7 @@ const BookingPage = () => {
             ))}
           </select>
         </label>
-        <br />
-        <br />
+        
         <label>
           Date:
           <input
@@ -73,7 +73,7 @@ const BookingPage = () => {
         </label>
         <br />
         <br />
-        <label>
+        <label style={{marginRight: '10px'}}>
           Start Time:
           <input
             type="time"
@@ -81,9 +81,9 @@ const BookingPage = () => {
             onChange={(e) => setStartTime(e.target.value)}
           />
         </label>
-        <br />
-        <br />
-        <label>
+        
+
+        <label >
           End Time:
           <input
             type="time"
@@ -122,8 +122,10 @@ const BookingPage = () => {
           />
         </label>
         <br />
-        <button type="submit">Book Room</button>
+        <br />
+        <button type="submit" class="btn btn-outline-success" >Book Room</button>
       </form>
+      </div>
     </div>
   );
 };
