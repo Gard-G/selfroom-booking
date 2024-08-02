@@ -50,6 +50,7 @@ const BookingPage = () => {
   return (
     <div>
       <h1>Booking Page</h1>
+      <br />
       <form onSubmit={handleSubmit}>
         <label>
           Room:
@@ -61,6 +62,7 @@ const BookingPage = () => {
           </select>
         </label>
         <br />
+        <br />
         <label>
           Date:
           <input
@@ -69,6 +71,7 @@ const BookingPage = () => {
             onChange={(e) => setDate(e.target.value)}
           />
         </label>
+        <br />
         <br />
         <label>
           Start Time:
@@ -79,6 +82,7 @@ const BookingPage = () => {
           />
         </label>
         <br />
+        <br />
         <label>
           End Time:
           <input
@@ -87,6 +91,7 @@ const BookingPage = () => {
             onChange={(e) => setEndTime(e.target.value)}
           />
         </label>
+        <br />
         <br />
         <label>
           Name:
@@ -97,8 +102,9 @@ const BookingPage = () => {
           />
         </label>
         <br />
+        <br />
         <label>
-          Phone:
+          Phone: 
           <input
             type="text"
             value={phone}
@@ -106,8 +112,9 @@ const BookingPage = () => {
           />
         </label>
         <br />
+        <br />
         <label>
-          Reason:
+          Reason: 
           <input
             type="text"
             value={reason}

@@ -56,14 +56,16 @@ function App() {
         borderRadius: '0px',
         color: 'black',
         border: '0px',
-        
+        fontWeight: '550'
       }
     };
   };
 
   return (
+    
     <div className="App">
       <Navbar />
+      <div style={{marginTop: '20px'}}>
       <h1>Booking Calendar</h1>
       <Calendar
         localizer={localizer}
@@ -74,6 +76,7 @@ function App() {
         style={{ height: 500 }}
         eventPropGetter={eventStyleGetter}
       />
+      </div>
     </div>
   );
 }
