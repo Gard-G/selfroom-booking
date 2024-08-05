@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const SECRET_KEY = 'secret'; // Replace with your actual secret key
 
 app.use(cors());
 app.use(express.json());
@@ -26,6 +29,54 @@ connection.connect(error => {
 // Test route
 app.post('/api/test', (req, res) => {
   res.send('Test route works!');
+});
+
+// Route to login
+app.post('/api/login', (req, res) => {
+  const { Username, Password } = req.body;
+
+  const query = 'SELECT * FROM user WHERE Username = ?';
+  connection.query(query, [Username], async (error, results) => {
+    if (error) {
+      return res.status(500).send('Error fetching data from database');
+    }
+    if (results.length === 0) {
+      return res.status(401).send('Invalid credentials');
+    }
+
+    const user = results[0];
+    const passwordMatch = await bcrypt.compare(Password, user.Password);
+
+    if (!passwordMatch) {
+      return res.status(401).send('Invalid credentials');
+    }
+
+    const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token });
+  });
+});
+
+// Middleware to protect routes
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, SECRET_KEY, (error, user) => {
+    if (error) {
+      return res.sendStatus(403);
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Protected route example
+app.get('/api/protected', authenticateToken, (req, res) => {
+  res.send('This is a protected route');
 });
 
 // Route to fetch bookings
@@ -67,7 +118,7 @@ app.get('/api/wait-bookings', (req, res) => {
     }));
     
     // Send the formatted results as the response
-    res.json(formattedResults);  // This is the fixed point
+    res.json(formattedResults);
   });
 });
 
