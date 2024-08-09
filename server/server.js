@@ -26,6 +26,24 @@ connection.connect(error => {
   console.log('Connected to MySQL');
 });
 
+// Middleware to protect routes
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401); // Unauthorized
+  }
+
+  jwt.verify(token, SECRET_KEY, (error, user) => {
+    if (error) {
+      return res.sendStatus(403); // Forbidden
+    }
+    req.user = user;
+    next();
+  });
+};
+
 // Test route
 app.post('/api/test', (req, res) => {
   res.send('Test route works!');
@@ -36,7 +54,7 @@ app.post('/api/login', (req, res) => {
   const { Username, Password } = req.body;
 
   const query = 'SELECT * FROM user WHERE Username = ?';
-  connection.query(query, [Username], async (error, results) => {
+  connection.query(query, [Username], (error, results) => {
     if (error) {
       return res.status(500).send('Error fetching data from database');
     }
@@ -45,9 +63,9 @@ app.post('/api/login', (req, res) => {
     }
 
     const user = results[0];
-    const passwordMatch = await bcrypt.compare(Password, user.Password);
 
-    if (!passwordMatch) {
+    // Direct comparison if passwords are not hashed
+    if (Password !== user.Password) {
       return res.status(401).send('Invalid credentials');
     }
 
@@ -56,23 +74,33 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// Middleware to protect routes
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+// Route to Fetch Orders by User
+app.get('/api/user-orders', authenticateToken, (req, res) => {
+  const userID = req.user.UserID;
 
-  if (!token) {
-    return res.sendStatus(401);
-  }
-
-  jwt.verify(token, SECRET_KEY, (error, user) => {
+  const query = `
+    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Status, lr.RoomName
+    FROM orderbooking ob
+    JOIN userlistorder ulo ON ob.OrderBooking = ulo.OrderBooking
+    JOIN listroom lr ON ob.RoomID = lr.RoomID
+    WHERE ulo.UserID = ?
+  `;
+  
+  connection.query(query, [userID], (error, results) => {
     if (error) {
-      return res.sendStatus(403);
+      return res.status(500).send('Error fetching data from database');
     }
-    req.user = user;
-    next();
+
+    const formattedResults = results.map(booking => ({
+      ...booking,
+      Date: new Date(booking.Date).toLocaleDateString(),
+      Start: new Date(booking.Start).toLocaleTimeString(),
+      End: new Date(booking.End).toLocaleTimeString()
+    }));
+
+    res.json(formattedResults);
   });
-};
+});
 
 // Protected route example
 app.get('/api/protected', authenticateToken, (req, res) => {

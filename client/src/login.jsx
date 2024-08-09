@@ -1,51 +1,38 @@
-// src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+function LoginPage() {
+  const [Username, setUsername] = useState('');
+  const [Password, setPassword] = useState('');
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
-        Username: username,
-        Password: password,
-      });
+      const response = await axios.post('/api/login', { Username, Password });
       localStorage.setItem('token', response.data.token);
-      setError('');
-      // Redirect or update UI as needed
-    } catch (err) {
-      setError('Invalid credentials');
+      window.location.href = '/status-orders'; // Redirect to status orders page
+    } catch (error) {
+      alert('Invalid credentials');
     }
   };
 
   return (
     <div>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      {error && <p>{error}</p>}
+      <h2>Login</h2>
+      <input
+        type="text"
+        placeholder="Username"
+        value={Username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={Password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleLogin}>Login</button>
     </div>
   );
 }
 
-export default Login;
+export default LoginPage;
