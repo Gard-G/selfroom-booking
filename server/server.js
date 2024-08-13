@@ -177,27 +177,37 @@ app.get('/api/rooms', (req, res) => {
 });
 
 // Route to create a new booking
-app.post('/api/bookings', (req, res) => {
+app.post('/api/bookings', authenticateToken, (req, res) => {
   const { RoomID, Date, Start, End, Name, Phone, Reason } = req.body;
+  const userID = req.user.UserID; // Get the UserID from the authenticated token
   
-  // Validate the input data
   if (!RoomID || !Date || !Start || !End || !Name || !Phone || !Reason) {
     return res.status(400).send('Missing required fields');
   }
 
-  // Construct the SQL query
   const query = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-  const status = 'wait'; // Fixed status
+  const status = 'wait';
 
-  // Execute the query
   connection.query(query, [RoomID, Date, Start, End, status, Name, Phone, Reason], (error, results) => {
     if (error) {
       console.error('Error inserting booking:', error);
       return res.status(500).json({ error: 'Error creating booking', details: error });
     }
-    res.status(201).send('Booking created successfully');
+
+    const orderBookingID = results.insertId; // Get the ID of the newly created booking
+
+    // Insert into userlistorder
+    const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
+    connection.query(userListOrderQuery, [userID, orderBookingID], (error, results) => {
+      if (error) {
+        console.error('Error inserting into userlistorder:', error);
+        return res.status(500).json({ error: 'Error linking user to booking', details: error });
+      }
+      res.status(201).send('Booking created and linked to user successfully');
+    });
   });
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
