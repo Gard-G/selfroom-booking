@@ -16,9 +16,11 @@ function App() {
       .then(response => {
         console.log('API Response:', response.data);
 
-        const formattedEvents = response.data.map(booking => {
-          const start = new Date(booking.Start); // Directly using DATETIME
-          const end = new Date(booking.End); // Directly using DATETIME
+        const formattedEvents = response.data
+          .filter(booking => booking.Status === 'booking') // Filter only bookings with 'booking' status
+          .map(booking => {
+            const start = new Date(booking.Start); // Directly using DATETIME
+            const end = new Date(booking.End); // Directly using DATETIME
 
           console.log('Parsed Dates:', start, end);
 
@@ -31,7 +33,7 @@ function App() {
             title: `${booking.RoomName} - ${booking.Name} - ${booking.Phone} - ${booking.Reason}`,
             start,
             end,
-            status: booking.Status
+            RoomCenter: booking.RoomCenter,
           };
         });
 
@@ -44,11 +46,23 @@ function App() {
 
   const eventStyleGetter = (event) => {
     let backgroundColor = '';
-    if (event.status === 'booking') {
-      backgroundColor = 'green';
-    } else if (event.status === 'reject') {
-      backgroundColor = 'red';
-    } 
+    switch (event.RoomCenter) {
+      case 'ศูนย์เทเวศร์':
+        backgroundColor = '#3498db'; // Light Blue
+        break;
+      case 'ศูนย์พณิชยการพระนคร':
+        backgroundColor = '#2ecc71'; // Green
+        break;
+      case 'ศูนย์พระนครเหนือ':
+        backgroundColor = '#e74c3c'; // Red
+        break;
+      case 'ศูนย์โชติเวช':
+        backgroundColor = '#f1c40f'; // Yellow
+        break;
+      default:
+        backgroundColor = '#95a5a6'; // Grey for undefined
+    }
+  
 
     return {
       style: {
@@ -67,6 +81,13 @@ function App() {
       <Navbar />
       <div style={{marginTop: '20px'}}>
       <h1>Booking Calendar</h1>
+      <div className="d-flex justify-content-end">
+      <span className='badge' style={{background:'#3498db'}}>ศูนย์เทเวศร์</span>
+      <span className='badge' style={{background:'#2ecc71'}}>ศูนย์พณิชยการพระนคร</span>
+      <span className='badge' style={{background:'#e74c3c'}}>ศูนย์พระนครเหนือ</span>
+      <span className='badge' style={{background:'#f1c40f'}}>ศูนย์โชติเวช</span>
+      </div>
+      <br />
       <Calendar
         localizer={localizer}
         events={events}
