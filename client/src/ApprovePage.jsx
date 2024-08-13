@@ -1,18 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const ApprovePage = () => {
   const [bookings, setBookings] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/wait-bookings')
-      .then(response => {
-        setBookings(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching bookings:', error);
-      });
-  }, []);
+    // Fetch user info to check if the user is an admin
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('You need to log in first');
+      navigate('/login');
+      return;
+    }
+
+    axios.get('http://localhost:5000/api/user-info', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (response.data.IDstatus !== 'admin') {
+        alert('Access denied: Admins only');
+        navigate('/');
+      } else {
+        // Fetch bookings for approval
+        axios.get('http://localhost:5000/api/wait-bookings')
+          .then(response => {
+            setBookings(response.data);
+          })
+          .catch(error => {
+            console.error('Error fetching bookings:', error);
+          });
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching user info:', error);
+      alert('Failed to verify user status.');
+      navigate('/');
+    });
+  }, [navigate]);
 
   const handleUpdateStatus = (OrderBooking, newStatus) => {
     axios.put('http://localhost:5000/api/update-booking-status', { OrderBooking, newStatus })

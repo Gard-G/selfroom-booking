@@ -74,6 +74,14 @@ app.post('/api/login', (req, res) => {
   });
 });
 
+// Route to fetch user info
+app.get('/api/user-info', authenticateToken, (req, res) => {
+  // `req.user` contains the user data after authentication
+  res.json(req.user);
+});
+
+
+
 // Route to Fetch Orders by User
 app.get('/api/user-orders', authenticateToken, (req, res) => {
   const userID = req.user.UserID;
