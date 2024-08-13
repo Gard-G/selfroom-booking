@@ -9,6 +9,7 @@ function LoginPage() {
     try {
       const response = await axios.post('/api/login', { Username, Password });
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('username', Username); // Store the username
       window.location.href = '/status-orders'; // Redirect to status orders page
     } catch (error) {
       alert('Invalid credentials');

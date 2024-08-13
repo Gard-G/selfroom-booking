@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Navbar from './components/nevbar';
 
 function StatusOrderPage() {
   const [orders, setOrders] = useState([]);
@@ -25,7 +26,10 @@ function StatusOrderPage() {
   }, []);
 
   return (
+    
     <div>
+      <Navbar />
+      <div>
       <h1>Your Orders</h1>
       <table>
         <thead>
@@ -51,6 +55,7 @@ function StatusOrderPage() {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
