@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from './components/nevbar';
 
 const BookingPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -62,6 +63,8 @@ const BookingPage = () => {
 
   return (
     <div>
+      <Navbar />
+    <div style={{marginTop: '20px'}}>
       <h1>Booking Page</h1>
       <div className="container p-5 my-5 bg-dark text-white">
         <br />
@@ -138,6 +141,7 @@ const BookingPage = () => {
           <button type="submit" className="btn btn-outline-success" >Book Room</button>
         </form>
       </div>
+    </div>
     </div>
   );
 };

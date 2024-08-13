@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './components/nevbar';
 
 const ApprovePage = () => {
   const [bookings, setBookings] = useState([]);
@@ -54,9 +55,11 @@ const ApprovePage = () => {
 
   return (
     <div>
+      <Navbar />
+    <div>
       <h1>Approve Bookings</h1>
-      <table border={5}>
-        <thead>
+      <table className='table' border={5}>
+        <thead className='table-dark'>
           <tr>
             <th>Name</th>
             <th>Date</th>
@@ -67,7 +70,7 @@ const ApprovePage = () => {
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className='table-info'>
           {bookings.map(booking => (
             <tr key={booking.OrderBooking}>
               <td>{booking.Name}</td>
@@ -90,6 +93,7 @@ const ApprovePage = () => {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 };

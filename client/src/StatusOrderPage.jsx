@@ -31,22 +31,22 @@ function StatusOrderPage() {
       <Navbar />
       <div>
       <h1>Your Orders</h1>
-      <table>
-        <thead>
+      <table className="table" border={5}>
+        <thead className='table-dark'>
           <tr>
-            <th>Order ID</th>
             <th>Room Name</th>
+            <th>Name</th>
             <th>Date</th>
             <th>Start</th>
             <th>End</th>
             <th>Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className='table-info'>
           {orders.map(order => (
             <tr key={order.OrderBooking}>
-              <td>{order.OrderBooking}</td>
               <td>{order.RoomName}</td>
+              <td>{order.Name}</td>
               <td>{order.Date}</td>
               <td>{order.Start}</td>
               <td>{order.End}</td>
