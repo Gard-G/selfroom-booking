@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min'; // Ensure Bootstrap's JavaScript is included
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,18 +26,16 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-print-none">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div className="container">
-        <a className="navbar-brand fontTH" href="//rmutp.ac.th">RMUTP</a>
-        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <a className="navbar-brand" href="//rmutp.ac.th">RMUTP</a>
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse fontTH" id="navbarResponsive">
+        <div className="collapse navbar-collapse" id="navbarResponsive">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item active">
-              <a className="nav-link" href="/">
-                หน้าแรก
-              </a>
+              <a className="nav-link" href="/">หน้าแรก</a>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="/booking">จองห้อง</a>
