@@ -63,7 +63,6 @@ function App() {
         backgroundColor = '#95a5a6'; // Grey for undefined
     }
   
-
     return {
       style: {
         backgroundColor,
@@ -76,27 +75,39 @@ function App() {
   };
 
   return (
-    
     <div className="App">
       <Navbar />
-      <div style={{marginTop: '20px'}}>
-      <h1>Booking Calendar</h1>
-      <div className="d-flex justify-content-end">
-      <span className='badge' style={{background:'#3498db'}}>ศูนย์เทเวศร์</span>
-      <span className='badge' style={{background:'#2ecc71'}}>ศูนย์พณิชยการพระนคร</span>
-      <span className='badge' style={{background:'#e74c3c'}}>ศูนย์พระนครเหนือ</span>
-      <span className='badge' style={{background:'#f1c40f'}}>ศูนย์โชติเวช</span>
-      </div>
-      <br />
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        titleAccessor="title"
-        style={{ height: 500 }}
-        eventPropGetter={eventStyleGetter}
-      />
+      <div className="container" style={{ marginTop: '20px' }}>
+        <h1 className="text-center mb-4">Booking Calendar</h1>
+        
+        <div className="row justify-content-end mb-2">
+          <div className="col-auto">
+            <span className='badge' style={{background:'#3498db'}}>ศูนย์เทเวศร์</span>
+          </div>
+          <div className="col-auto">
+            <span className='badge' style={{background:'#2ecc71'}}>ศูนย์พณิชยการพระนคร</span>
+          </div>
+          <div className="col-auto">
+            <span className='badge' style={{background:'#e74c3c'}}>ศูนย์พระนครเหนือ</span>
+          </div>
+          <div className="col-auto">
+            <span className='badge' style={{background:'#f1c40f'}}>ศูนย์โชติเวช</span>
+          </div>
+        </div>
+        
+        <div className="row">
+          <div className="col-12">
+            <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              titleAccessor="title"
+              style={{ height: '70vh' }}
+              eventPropGetter={eventStyleGetter}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -56,44 +56,50 @@ const ApprovePage = () => {
   return (
     <div>
       <Navbar />
-    <div>
-      <h1>Approve Bookings</h1>
-      <table className='table' border={5}>
-        <thead className='table-dark'>
-          <tr>
-            <th>Name</th>
-            <th>Date</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Phone</th>
-            <th>Reason</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody className='table-info'>
-          {bookings.map(booking => (
-            <tr key={booking.OrderBooking}>
-              <td>{booking.Name}</td>
-              <td>{booking.Date}</td>
-              <td>{booking.Start}</td>
-              <td>{booking.End}</td>
-              <td>{booking.Phone}</td>
-              <td>{booking.Reason}</td>
-              <td>
-                <button onClick={() => handleUpdateStatus(booking.OrderBooking, 'booking')}
-                style={{ backgroundColor: 'green', color: 'white', marginLeft: '5px' }}
-                >Approve
-                </button>
-                <button onClick={() => handleUpdateStatus(booking.OrderBooking, 'reject')}
-                style={{ backgroundColor: 'red', color: 'white', marginLeft: '5px', marginRight: '5px'}}
-                >Reject
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      <div className="container ">
+        <h1>Approve Bookings</h1>
+        <div className="table-responsive">
+          <table className='table table-bordered table-striped'>
+            <thead className='table-dark'>
+              <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Phone</th>
+                <th>Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody className='table-info'>
+              {bookings.map(booking => (
+                <tr key={booking.OrderBooking}>
+                  <td>{booking.Name}</td>
+                  <td>{booking.Date}</td>
+                  <td>{booking.Start}</td>
+                  <td>{booking.End}</td>
+                  <td>{booking.Phone}</td>
+                  <td>{booking.Reason}</td>
+                  <td>
+                    <button 
+                      onClick={() => handleUpdateStatus(booking.OrderBooking, 'booking')}
+                      className="btn btn-success me-2"
+                    >
+                      Approve
+                    </button>
+                    <button 
+                      onClick={() => handleUpdateStatus(booking.OrderBooking, 'reject')}
+                      className="btn btn-danger"
+                    >
+                      Reject
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
