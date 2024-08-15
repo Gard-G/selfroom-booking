@@ -6,6 +6,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 const BookingPage = () => {
   const [rooms, setRooms] = useState([]);
+  const [roomCenters, setRoomCenters] = useState([]);
+  const [selectedCenter, setSelectedCenter] = useState('');
+  const [filteredRooms, setFilteredRooms] = useState([]);
   const [roomID, setRoomID] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -15,7 +18,6 @@ const BookingPage = () => {
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    // Check for token and redirect if not found
     const token = localStorage.getItem('token');
     if (!token) {
       alert('You need to log in first');
@@ -23,15 +25,26 @@ const BookingPage = () => {
       return;
     }
 
-    // Fetch available rooms
+    // Fetch all rooms
     axios.get('http://localhost:5000/api/rooms')
       .then(response => {
-        setRooms(response.data);
+        const allRooms = response.data;
+        setRooms(allRooms);
+        const centers = Array.from(new Set(allRooms.map(room => room.RoomCenter)));
+        setRoomCenters(centers);
       })
       .catch(error => {
         console.error('Error fetching rooms:', error);
       });
   }, []);
+
+  const handleCenterChange = (e) => {
+    const selectedCenter = e.target.value;
+    setSelectedCenter(selectedCenter);
+    const filtered = rooms.filter(room => room.RoomCenter === selectedCenter);
+    setFilteredRooms(filtered);
+    setRoomID(''); // Reset the room selection when center changes
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -41,7 +54,7 @@ const BookingPage = () => {
       return;
     }
 
-    const token = localStorage.getItem('token'); // Get the token from localStorage
+    const token = localStorage.getItem('token');
     const startDateTime = `${date} ${startTime}`;
     const endDateTime = `${date} ${endTime}`;
 
@@ -55,7 +68,7 @@ const BookingPage = () => {
       Reason: reason
     }, {
       headers: {
-        Authorization: `Bearer ${token}` // Include the token in the request headers
+        Authorization: `Bearer ${token}`
       }
     })
       .then(response => {
@@ -76,29 +89,46 @@ const BookingPage = () => {
   };
 
   return (
-    <div style={{width: '700px'}}>
+    <div style={{width: '500px'}}>
       <Navbar />
       <div className="container" style={{ marginTop: '20px' }}>
         <h1>Booking Page</h1>
         <div className="container p-5 my-5 bg-dark text-white rounded">
           <form onSubmit={handleSubmit}>
-
-            <div className='row '>
-              <div className="form-group mb-3 col-lg-6 col-12">
+              <div className='form-group mb-3'>
+                <label htmlFor="center">Room Center:</label>
+                <select
+                  id="center"
+                  className="form-control"
+                  value={selectedCenter}
+                  onChange={handleCenterChange}
+                >
+                  <option value="">Select Center</option>
+                  {roomCenters.map(center => (
+                    <option key={center} value={center}>
+                      {center}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            
+              <div className='form-group mb-3'>
                 <label htmlFor="room">Room:</label>
                 <select
                   id="room"
                   className="form-control"
                   value={roomID}
                   onChange={(e) => setRoomID(e.target.value)}
+                  disabled={!selectedCenter} // Disable if no center is selected
                 >
                   <option value="">Select Room</option>
-                  {rooms.map(room => (
+                  {filteredRooms.map(room => (
                     <option key={room.RoomID} value={room.RoomID}>{room.RoomName}</option>
                   ))}
                 </select>
               </div>
-              <div className="form-group mb-3 col-lg-6 col-12">
+
+              <div className='form-group mb-3'>
                 <label htmlFor="date">Date:</label>
                 <input
                   id="date"
@@ -108,41 +138,39 @@ const BookingPage = () => {
                   onChange={(e) => setDate(e.target.value)}
                 />
               </div>
-            </div>
 
-            <div className='row'>
-            <div className="form-group mb-3 col-lg-6 col-12">
-              <label htmlFor="startTime">Start Time:</label>
-              <input
-                id="startTime"
-                type="time"
-                className="form-control"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
-            </div>
+              <div className='row'>
+              <div className="form-group mb-3 col-lg-6 col-12">
+                <label htmlFor="startTime">Start Time:</label>
+                <input
+                  id="startTime"
+                  type="time"
+                  className="form-control"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
+              </div>
+              <div className="form-group mb-3 col-lg-6 col-12">
+                <label htmlFor="endTime">End Time:</label>
+                <input
+                  id="endTime"
+                  type="time"
+                  className="form-control"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
+              </div>
 
-            <div className="form-group mb-3 col-lg-6 col-12">
-              <label htmlFor="endTime">End Time:</label>
-              <input
-                id="endTime"
-                type="time"
-                className="form-control"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
-            </div>
-            </div>
-
-            <div className="form-group mb-3">
-              <label htmlFor="name">Name:</label>
-              <input
-                id="name"
-                type="text"
-                className="form-control"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <div className="form-group mb-3">
+                <label htmlFor="name">Name:</label>
+                <input
+                  id="name"
+                  type="text"
+                  className="form-control"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
             </div>
 
             <div className="form-group mb-3">
