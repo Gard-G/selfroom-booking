@@ -46,6 +46,9 @@ function Navbar() {
             <li className="nav-item">
               <a className="nav-link" href="/status-orders">รายการจอง</a>
             </li>
+            <li className="nav-item">
+            <a className="nav-link" href="/add-rooms">เพิ่มห้อง</a>
+            </li>
             {isLoggedIn ? (
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

@@ -184,6 +184,35 @@ app.get('/api/rooms', (req, res) => {
   });
 });
 
+// Route to fetch room centers (replace this if your centers are static)
+app.get('/api/room-centers', (req, res) => {
+  const roomCenters = ['ศูนย์เทเวศร์', 'ศูนย์พณิชยการพระนคร', 'ศูนย์พระนครเหนือ', 'ศูนย์โชติเวช'];
+  res.json(roomCenters);
+});
+
+
+
+// Route to add a new room
+app.post('/api/rooms', (req, res) => {
+  const { RoomName, RoomCenter } = req.body;
+
+  if (!RoomName || !RoomCenter) {
+    return res.status(400).send('Missing required fields');
+  }
+
+  const query = 'INSERT INTO listroom (RoomName, RoomCenter) VALUES (?, ?)';
+  
+  connection.query(query, [RoomName, RoomCenter], (error, results) => {
+    if (error) {
+      console.error('Error adding room:', error);
+      return res.status(500).json({ error: 'Error adding room', details: error });
+    }
+
+    res.status(201).send('Room added successfully');
+  });
+});
+
+
 // Route to create a new booking
 app.post('/api/bookings', authenticateToken, (req, res) => {
   const { RoomID, Date, Start, End, Name, Phone, Reason } = req.body;

@@ -7,6 +7,7 @@ import BookingPage from './BookingPage';
 import ApprovePage from './ApprovePage';
 import Login from './login';
 import StatusOrderPage from './StatusOrderPage';
+import AddRoomPage from './AddRoom';
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -22,6 +23,7 @@ root.render(
         <Route path="/approve" element={<ApprovePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/status-orders" element={<StatusOrderPage />} />
+        <Route path="/add-rooms" element={<AddRoomPage />} />
 
       </Routes>
     </Router>
