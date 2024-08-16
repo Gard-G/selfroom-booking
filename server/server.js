@@ -70,7 +70,7 @@ app.post('/api/login', (req, res) => {
     }
 
     const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token });
+    res.json({ token, IDstatus: user.IDstatus  });
   });
 });
 

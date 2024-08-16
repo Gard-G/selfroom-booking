@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min'; // Ensure Bootstrap's JavaScript is included
+import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Check if the user is logged in by checking localStorage for the token
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
       const storedUsername = localStorage.getItem('username');
+      const storedStatus = localStorage.getItem('IDstatus'); // Assuming you store the user's status in localStorage
       if (storedUsername) {
         setUsername(storedUsername);
+      }
+      if (storedStatus === 'admin') {
+        setIsAdmin(true);
       }
     }
   }, []);
@@ -21,8 +25,10 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('IDstatus');
     setIsLoggedIn(false);
-    window.location.href = '/'; // Redirect to homepage after logout
+    setIsAdmin(false);
+    window.location.href = '/';
   };
 
   return (
@@ -41,14 +47,18 @@ function Navbar() {
               <a className="nav-link" href="/booking">จองห้อง</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/approve">ลงนาม/อนุมัติ</a>
-            </li>
-            <li className="nav-item">
               <a className="nav-link" href="/status-orders">รายการจอง</a>
             </li>
-            <li className="nav-item">
-            <a className="nav-link" href="/add-rooms">เพิ่มห้อง</a>
-            </li>
+            {isAdmin && (
+              <>
+                <li className="nav-item">
+                  <a className="nav-link" href="/approve">ลงนาม/อนุมัติ</a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link" href="/add-rooms">เพิ่มห้อง</a>
+                </li>
+              </>
+            )}
             {isLoggedIn ? (
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
