@@ -11,6 +11,7 @@ import AddRoomPage from './AddRoom';
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import UserManagement from './UManage';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 
@@ -24,7 +25,7 @@ root.render(
         <Route path="/login" element={<Login />} />
         <Route path="/status-orders" element={<StatusOrderPage />} />
         <Route path="/add-rooms" element={<AddRoomPage />} />
-
+        <Route path="/User-Manage" element={<UserManagement />} />
       </Routes>
     </Router>
   </React.StrictMode>

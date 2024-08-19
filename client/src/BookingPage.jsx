@@ -89,11 +89,13 @@ const BookingPage = () => {
   };
 
   return (
-    <div style={{width: '500px'}}>
+    <div className='container' >
       <Navbar />
-      <div className="container" style={{ marginTop: '20px' }}>
+      <div className="container card p-5 my-5 bg-dark text-white rounded" style={{ marginTop: '20px' }}>
+      <div className="card-header">
         <h1>Booking Page</h1>
-        <div className="container p-5 my-5 bg-dark text-white rounded">
+      </div>
+        <div className="card-body">
           <form onSubmit={handleSubmit}>
               <div className='form-group mb-3'>
                 <label htmlFor="center">Room Center:</label>
