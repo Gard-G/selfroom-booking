@@ -65,15 +65,23 @@ app.post('/api/users', authenticateToken, (req, res) => {
   if (!Username || !Password || !IDstatus) {
     return res.status(400).send('Missing required fields');
   }
+
+  bcrypt.hash(Password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error('Error hashing password:', err);
+      return res.status(500).send('Server error');
+    }
+    
     const query = 'INSERT INTO user (Username, Password, IDstatus) VALUES (?, ?, ?)';
-    connection.query(query, [Username, Password, IDstatus], (error) => {
+    connection.query(query, [Username, hashedPassword, IDstatus], (error) => {
       if (error) {
         console.error('Error adding user:', error);
         return res.status(500).send('Server error');
       }
       res.status(201).send('User created successfully');
     });
-});
+  });
+}); 
 
 // Edit an existing user
 app.put('/api/users/:id', authenticateToken, (req, res) => {
@@ -88,14 +96,22 @@ app.put('/api/users/:id', authenticateToken, (req, res) => {
   const queryParams = [Username, IDstatus, id];
 
   if (Password) {
+
+    bcrypt.hash(Password, 10, (err, hashedPassword) => {
+      if (err) {
+        console.error('Error hashing password:', err);
+        return res.status(500).send('Server error');
+      }
+
       const updateQueryWithPassword = 'UPDATE user SET Username = ?, Password = ?, IDstatus = ? WHERE UserID = ?';
-      connection.query(updateQueryWithPassword, [Username, Password, IDstatus, id], (error) => {
+      connection.query(updateQueryWithPassword, [Username, hashedPassword, IDstatus, id], (error) => {
         if (error) {
           console.error('Error updating user:', error);
           return res.status(500).send('Server error');
         }
         res.send('User updated successfully');
       });
+    });
   } else {
     connection.query(updateQuery, queryParams, (error) => {
       if (error) {
