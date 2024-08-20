@@ -123,6 +123,27 @@ app.put('/api/users/:id', authenticateToken, (req, res) => {
   }
 });
 
+// Delete an existing user
+app.delete('/api/users/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+
+  const deleteQuery = 'DELETE FROM user WHERE UserID = ?';
+
+  connection.query(deleteQuery, [id], (error, results) => {
+    if (error) {
+      console.error('Error deleting user:', error);
+      return res.status(500).send('Server error');
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).send('User not found');
+    }
+
+    res.send('User deleted successfully');
+  });
+});
+
+
 // Test route
 app.post('/api/test', (req, res) => {
   res.send('Test route works!');
