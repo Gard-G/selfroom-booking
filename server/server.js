@@ -164,16 +164,47 @@ app.post('/api/login', (req, res) => {
 
     const user = results[0];
 
-    // Direct comparison if passwords are not hashed
-    if (Password !== user.Password) {
-      return res.status(401).send('Invalid credentials');
-    }
+    // Log for debugging: Check the password from the database
+    console.log('Stored Password:', user.Password);
 
-    const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token, IDstatus: user.IDstatus  });
+    // Check if the password is hashed
+    const isHashed = user.Password.length === 60; // bcrypt hash length is exactly 60 characters
+
+    if (isHashed) {
+      // Compare the provided password with the hashed password in the database
+      bcrypt.compare(Password, user.Password, (err, isMatch) => {
+        if (err) {
+          console.error('Error comparing passwords:', err);
+          return res.status(500).send('Server error');
+        }
+
+        // Log for debugging: Check if the passwords match
+        console.log('Password Match:', isMatch);
+
+        if (!isMatch) {
+          return res.status(401).send('Invalid credentials');
+        }
+
+        // Generate and return the token
+        const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
+        res.json({ token, IDstatus: user.IDstatus });
+      });
+    } else {
+      // Direct comparison if passwords are not hashed
+      if (Password !== user.Password) {
+        return res.status(401).send('Invalid credentials');
+      }
+
+      // Generate and return the token
+      const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
+      res.json({ token, IDstatus: user.IDstatus });
+    }
   });
 });
 
+
+
+  
 // Route to fetch user info
 app.get('/api/user-info', authenticateToken, (req, res) => {
   // `req.user` contains the user data after authentication
