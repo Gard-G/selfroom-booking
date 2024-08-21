@@ -16,6 +16,8 @@ const BookingPage = () => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [reason, setReason] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -72,7 +74,7 @@ const BookingPage = () => {
       }
     })
       .then(response => {
-        alert('Booking created successfully');
+        
         // Reset form fields after successful booking
         setRoomID('');
         setDate('');
@@ -81,11 +83,18 @@ const BookingPage = () => {
         setName('');
         setPhone('');
         setReason('');
+        handleShowModal('User updated successfully');
       })
       .catch(error => {
         console.error('Error creating booking:', error.response ? error.response.data : error.message);
         alert('Failed to create booking.');
       });
+  };
+
+  const handleCloseModal = () => setShowModal(false);
+  const handleShowModal = (message) => {
+    setModalContent(message);
+    setShowModal(true);
   };
 
   return (
@@ -202,6 +211,24 @@ const BookingPage = () => {
             </button>
           </form>
         </div>
+        {showModal && (
+          <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content bg-success">
+                <div className="modal-header">
+                  <h5 className="modal-title">Notification</h5>
+                  <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+                </div>
+                <div className="modal-body">
+                  {modalContent}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

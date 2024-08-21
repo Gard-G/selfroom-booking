@@ -42,12 +42,22 @@ const AddRoomPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/rooms', { RoomName: roomName, RoomCenter: roomCenter });
+      const token = localStorage.getItem('token');
+      await axios.post(
+        'http://localhost:5000/api/add-room',
+        { RoomName: roomName, RoomCenter: roomCenter },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       alert('Room added successfully!');
       setRoomName('');
       setRoomCenter('');
     } catch (error) {
       console.error('Error adding room:', error);
+      alert('Failed to add room.');
     }
   };
 
