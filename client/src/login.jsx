@@ -33,9 +33,12 @@ function LoginPage() {
 
   return (
     <div className="container mt-5">
+      <div className="card p-5 my-5 bg-dark text-white rounded">
+      <div className="card-header">
       <h2>Login</h2>
-      <div className="container p-5 my-5 bg-dark text-white rounded">
-        <div className="form-group mb-3">
+      </div>
+        <div className="card-body">
+          <div className="form-group mb-3">
           <label htmlFor="username">Username:</label>
           <input
             type="text"
@@ -65,6 +68,7 @@ function LoginPage() {
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
+        </div>
         </div>
       </div>
     </div>
