@@ -65,21 +65,14 @@ app.post('/api/users', authenticateToken, (req, res) => {
   if (!Username || !Password || !IDstatus) {
     return res.status(400).send('Missing required fields');
   }
-
-  bcrypt.hash(Password, 10, (err, hashedPassword) => {
-    if (err) {
-      console.error('Error hashing password:', err);
-      return res.status(500).send('Server error');
-    }
-    
+ 
     const query = 'INSERT INTO user (Username, Password, IDstatus) VALUES (?, ?, ?)';
-    connection.query(query, [Username, hashedPassword, IDstatus], (error) => {
+    connection.query(query, [Username, Password, IDstatus], (error) => {
       if (error) {
         console.error('Error adding user:', error);
         return res.status(500).send('Server error');
       }
       res.status(201).send('User created successfully');
-    });
   });
 }); 
 
@@ -97,21 +90,14 @@ app.put('/api/users/:id', authenticateToken, (req, res) => {
 
   if (Password) {
 
-    bcrypt.hash(Password, 10, (err, hashedPassword) => {
-      if (err) {
-        console.error('Error hashing password:', err);
-        return res.status(500).send('Server error');
-      }
-
       const updateQueryWithPassword = 'UPDATE user SET Username = ?, Password = ?, IDstatus = ? WHERE UserID = ?';
-      connection.query(updateQueryWithPassword, [Username, hashedPassword, IDstatus, id], (error) => {
+      connection.query(updateQueryWithPassword, [Username, Password, IDstatus, id], (error) => {
         if (error) {
           console.error('Error updating user:', error);
           return res.status(500).send('Server error');
         }
         res.send('User updated successfully');
       });
-    });
   } else {
     connection.query(updateQuery, queryParams, (error) => {
       if (error) {
@@ -164,43 +150,16 @@ app.post('/api/login', (req, res) => {
 
     const user = results[0];
 
-    // Log for debugging: Check the password from the database
-    console.log('Stored Password:', user.Password);
-
-    // Check if the password is hashed
-    const isHashed = user.Password.length === 60; // bcrypt hash length is exactly 60 characters
-
-    if (isHashed) {
-      // Compare the provided password with the hashed password in the database
-      bcrypt.compare(Password, user.Password, (err, isMatch) => {
-        if (err) {
-          console.error('Error comparing passwords:', err);
-          return res.status(500).send('Server error');
-        }
-
-        // Log for debugging: Check if the passwords match
-        console.log('Password Match:', isMatch);
-
-        if (!isMatch) {
-          return res.status(401).send('Invalid credentials');
-        }
-
-        // Generate and return the token
-        const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
-        res.json({ token, IDstatus: user.IDstatus });
-      });
-    } else {
-      // Direct comparison if passwords are not hashed
-      if (Password !== user.Password) {
-        return res.status(401).send('Invalid credentials');
-      }
-
-      // Generate and return the token
-      const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
-      res.json({ token, IDstatus: user.IDstatus });
+    // Direct comparison if passwords are not hashed
+    if (Password !== user.Password) {
+      return res.status(401).send('Invalid credentials');
     }
+
+    const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token, IDstatus: user.IDstatus  });
   });
 });
+
 
 
 
