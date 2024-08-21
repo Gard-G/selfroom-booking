@@ -31,7 +31,8 @@ const UserManagement = () => {
       setLoading(true);
       try {
         const response = await axios.get('/api/users', { headers: { Authorization: `Bearer ${token}` } });
-        setUsers(response.data);
+        const sortedUsers = response.data.sort((a, b) => a.IDstatus.localeCompare(b.IDstatus));
+        setUsers(sortedUsers);
       } catch (error) {
         setError('Error fetching users');
         console.error('Error fetching users:', error);
