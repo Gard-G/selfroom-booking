@@ -44,7 +44,7 @@ function Navbar() {
               <a className="nav-link" href="/">หน้าแรก</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/booking">จองห้อง</a>
+              <a className="nav-link" href="/SelectCenter">จองห้อง</a>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="/status-orders">รายการจอง</a>

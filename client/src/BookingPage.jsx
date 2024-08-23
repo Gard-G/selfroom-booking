@@ -3,11 +3,10 @@ import axios from 'axios';
 import Navbar from './components/nevbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import { useLocation } from 'react-router-dom';
 
 const BookingPage = () => {
   const [rooms, setRooms] = useState([]);
-  const [roomCenters, setRoomCenters] = useState([]);
-  const [selectedCenter, setSelectedCenter] = useState('');
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [roomID, setRoomID] = useState('');
   const [date, setDate] = useState('');
@@ -18,6 +17,10 @@ const BookingPage = () => {
   const [reason, setReason] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState('');
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const selectedCenter = queryParams.get('center'); // Read selected center from URL
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -32,21 +35,13 @@ const BookingPage = () => {
       .then(response => {
         const allRooms = response.data;
         setRooms(allRooms);
-        const centers = Array.from(new Set(allRooms.map(room => room.RoomCenter)));
-        setRoomCenters(centers);
+        const filtered = allRooms.filter(room => room.RoomCenter === selectedCenter);
+        setFilteredRooms(filtered);
       })
       .catch(error => {
         console.error('Error fetching rooms:', error);
       });
-  }, []);
-
-  const handleCenterChange = (e) => {
-    const selectedCenter = e.target.value;
-    setSelectedCenter(selectedCenter);
-    const filtered = rooms.filter(room => room.RoomCenter === selectedCenter);
-    setFilteredRooms(filtered);
-    setRoomID(''); // Reset the room selection when center changes
-  };
+  }, [selectedCenter]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -74,7 +69,6 @@ const BookingPage = () => {
       }
     })
       .then(response => {
-        
         // Reset form fields after successful booking
         setRoomID('');
         setDate('');
@@ -98,59 +92,41 @@ const BookingPage = () => {
   };
 
   return (
-    <div className='container' >
+    <div className='container'>
       <Navbar />
       <div className="container card p-5 my-5 bg-dark text-white rounded" style={{ marginTop: '20px' }}>
-      <div className="card-header">
-        <h1>Booking Page</h1>
-      </div>
+        <div className="card-header">
+          <h2>จองห้อง {selectedCenter}</h2> {/* Display the selected center */}
+        </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-              <div className='form-group mb-3'>
-                <label htmlFor="center">Room Center:</label>
-                <select
-                  id="center"
-                  className="form-control"
-                  value={selectedCenter}
-                  onChange={handleCenterChange}
-                >
-                  <option value="">Select Center</option>
-                  {roomCenters.map(center => (
-                    <option key={center} value={center}>
-                      {center}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            
-              <div className='form-group mb-3'>
-                <label htmlFor="room">Room:</label>
-                <select
-                  id="room"
-                  className="form-control"
-                  value={roomID}
-                  onChange={(e) => setRoomID(e.target.value)}
-                  disabled={!selectedCenter} // Disable if no center is selected
-                >
-                  <option value="">Select Room</option>
-                  {filteredRooms.map(room => (
-                    <option key={room.RoomID} value={room.RoomID}>{room.RoomName}</option>
-                  ))}
-                </select>
-              </div>
+            <div className='form-group mb-3'>
+              <label htmlFor="room">Room:</label>
+              <select
+                id="room"
+                className="form-control"
+                value={roomID}
+                onChange={(e) => setRoomID(e.target.value)}
+              >
+                <option value="">Select Room</option>
+                {filteredRooms.map(room => (
+                  <option key={room.RoomID} value={room.RoomID}>{room.RoomName}</option>
+                ))}
+              </select>
+            </div>
 
-              <div className='form-group mb-3'>
-                <label htmlFor="date">Date:</label>
-                <input
-                  id="date"
-                  type="date"
-                  className="form-control"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-              </div>
+            <div className='form-group mb-3'>
+              <label htmlFor="date">Date:</label>
+              <input
+                id="date"
+                type="date"
+                className="form-control"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
 
-              <div className='row'>
+            <div className='row'>
               <div className="form-group mb-3 col-lg-6 col-12">
                 <label htmlFor="startTime">Start Time:</label>
                 <input
@@ -171,17 +147,17 @@ const BookingPage = () => {
                   onChange={(e) => setEndTime(e.target.value)}
                 />
               </div>
+            </div>
 
-              <div className="form-group mb-3">
-                <label htmlFor="name">Name:</label>
-                <input
-                  id="name"
-                  type="text"
-                  className="form-control"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
+            <div className="form-group mb-3">
+              <label htmlFor="name">Name:</label>
+              <input
+                id="name"
+                type="text"
+                className="form-control"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
 
             <div className="form-group mb-3">
