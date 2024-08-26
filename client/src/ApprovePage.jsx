@@ -64,6 +64,7 @@ const ApprovePage = () => {
               <tr>
                 <th>Name</th>
                 <th>Date</th>
+                <th>ชื่อห้อง</th>
                 <th>Start</th>
                 <th>End</th>
                 <th>Phone</th>
@@ -76,6 +77,7 @@ const ApprovePage = () => {
                 <tr key={booking.OrderBooking}>
                   <td>{booking.Name}</td>
                   <td>{booking.Date}</td>
+                  <td>{booking.RoomName}</td>
                   <td>{booking.Start}</td>
                   <td>{booking.End}</td>
                   <td>{booking.Phone}</td>
