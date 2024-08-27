@@ -46,7 +46,7 @@ const StatusOrderPage = () => {
         ) : (
           <table className="table table-striped table-bordered">
             <thead className="table-dark">
-              <tr>
+              <tr style={{fontSize: '20px'}}>
                 <th>Room Name</th>
                 <th>Name</th>
                 <th>Date</th>

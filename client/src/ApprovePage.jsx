@@ -60,7 +60,7 @@ const ApprovePage = () => {
         <h1>Approve Bookings</h1>
         <div className="table-responsive">
           <table className='table table-bordered '>
-            <thead className='table-primary '>
+            <thead className='table-dark '>
               <tr style={{fontSize: '20px'}}>
                 <th>Name</th>
                 <th>Date</th>
