@@ -59,9 +59,9 @@ const ApprovePage = () => {
       <div className="container ">
         <h1>Approve Bookings</h1>
         <div className="table-responsive">
-          <table className='table table-bordered table-striped'>
-            <thead className='table-dark'>
-              <tr>
+          <table className='table table-bordered '>
+            <thead className='table-primary '>
+              <tr style={{fontSize: '20px'}}>
                 <th>Name</th>
                 <th>Date</th>
                 <th>ชื่อห้อง</th>

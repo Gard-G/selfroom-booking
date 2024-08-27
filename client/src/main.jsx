@@ -13,6 +13,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import UserManagement from './UManage';
 import SelectCenterPage from './SelectCenterPage';
+import Testapp from './test';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 
@@ -28,6 +29,7 @@ root.render(
         <Route path="/add-rooms" element={<AddRoomPage />} />
         <Route path="/User-Manage" element={<UserManagement />} />
         <Route path="/SelectCenter" element={<SelectCenterPage />} />
+        <Route path="/testapp" element={<Testapp />} />
       </Routes>
     </Router>
   </React.StrictMode>

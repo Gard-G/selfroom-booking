@@ -94,7 +94,7 @@ const BookingPage = () => {
   return (
     <div className='container'>
       <Navbar />
-      <div className="container card p-5 my-5 bg-dark text-white rounded" style={{ marginTop: '20px' }}>
+      <div className="card card-container bg-dark text-white rounded" >
         <div className="card-header">
           <h2>จองห้อง {selectedCenter}</h2> {/* Display the selected center */}
         </div>

@@ -16,6 +16,7 @@ function CustomToolbar(props) {
   };
 
   return (
+    <div className=''>
     <div className="rbc-toolbar">
       <span className="rbc-btn-group">
         {/* Custom Previous Button */}
@@ -51,6 +52,7 @@ function CustomToolbar(props) {
         <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('day')}>Day</button>
         <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('agenda')}>Agenda</button>
       </span>
+    </div>
     </div>
   );
 }
@@ -192,13 +194,13 @@ function App() {
         
         <div className="row">
           <div className="col-12">
-            <Calendar
+            <Calendar className='calenda-size'
               localizer={localizer}
               events={filteredEvents} // Use filtered events based on selected center
               startAccessor="start"
               endAccessor="end"
               titleAccessor="title"
-              style={{ height: '70vh', width: '140vh', maxWidth: '100%' }} // Responsive calendar size
+              
               eventPropGetter={eventStyleGetter} // Apply custom styles to events
               components={{
                 toolbar: CustomToolbar // Use the custom toolbar component
