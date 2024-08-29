@@ -66,12 +66,12 @@ const AddRoomPage = () => {
         <Navbar />
       <div className="card p-5 my-5 bg-dark text-white rounded">
         <div className="card-header">
-          <h2>Add Room</h2>
+          <h2>เพิ่มห้อง</h2>
         </div>
         <div className="card-body ">
           <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
-              <label htmlFor="roomName">Room Name:</label>
+              <label htmlFor="roomName">ชื่อห้อง:</label>
               <input
                 id="roomName"
                 type="text"
@@ -81,14 +81,14 @@ const AddRoomPage = () => {
               />
             </div>
             <div className="form-group mb-3">
-              <label htmlFor="roomCenter">Room Center:</label>
+              <label htmlFor="roomCenter">ศูนย์:</label>
               <select
                 id="roomCenter"
                 className="form-control"
                 value={roomCenter}
                 onChange={(e) => setRoomCenter(e.target.value)}
               >
-                <option value="">Select a center</option>
+                <option value="">เลือกศูนย์</option>
                 {centers.map((center) => (
                   <option key={center} value={center}>
                     {center}

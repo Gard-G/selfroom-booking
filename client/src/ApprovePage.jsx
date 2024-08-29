@@ -57,18 +57,18 @@ const ApprovePage = () => {
     <div>
       <Navbar />
       <div className="container ">
-        <h1>Approve Bookings</h1>
+        <h1>อนุมัติรายการจอง</h1>
         <div className="table-responsive">
           <table className='table table-bordered '>
             <thead className='table-dark '>
               <tr style={{fontSize: '20px'}}>
-                <th>Name</th>
-                <th>Date</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>วันที่</th>
                 <th>ชื่อห้อง</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Phone</th>
-                <th>Reason</th>
+                <th>เวลาเริ่ม</th>
+                <th>ถึงเวลา</th>
+                <th>เบอร์โทร</th>
+                <th>ใช้ทำอะไร</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -87,13 +87,13 @@ const ApprovePage = () => {
                       onClick={() => handleUpdateStatus(booking.OrderBooking, 'booking')}
                       className="btn btn-success me-2"
                     >
-                      Approve
+                      อนุมัติ
                     </button>
                     <button 
                       onClick={() => handleUpdateStatus(booking.OrderBooking, 'reject')}
                       className="btn btn-danger"
                     >
-                      Reject
+                      ปฏิเสธ
                     </button>
                   </td>
                 </tr>

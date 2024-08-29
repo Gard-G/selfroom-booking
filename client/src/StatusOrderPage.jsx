@@ -39,7 +39,7 @@ const StatusOrderPage = () => {
     <div>
       <Navbar />
       <div className="container">
-        <h1>Your Orders</h1>
+        <h1>รายการจองของคุณ</h1>
         {error && <div className="alert alert-danger">{error}</div>}
         {orders.length === 0 ? (
           <p>No orders found.</p>
@@ -47,12 +47,12 @@ const StatusOrderPage = () => {
           <table className="table table-striped table-bordered">
             <thead className="table-dark">
               <tr style={{fontSize: '20px'}}>
-                <th>Room Name</th>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Status</th>
+                <th>ชื่อห้อง</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>วันที่</th>
+                <th>เวลาเริ่ม</th>
+                <th>ถึงเวลา</th>
+                <th>สถานะ</th>
               </tr>
             </thead>
             <tbody className='table-info'>

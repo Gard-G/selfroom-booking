@@ -39,7 +39,7 @@ function CustomToolbar(props) {
       <span className="rbc-btn-group">
         {/* Custom Today Button */}
         <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => props.onNavigate('TODAY')}>
-          Today
+          วันนี้
         </button>
       </span>
 
@@ -48,9 +48,9 @@ function CustomToolbar(props) {
 
       <span className="rbc-btn-group">
         {/* View Buttons */}
-        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('month')}>Month</button>
-        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('day')}>Day</button>
-        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('agenda')}>Agenda</button>
+        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('month')}>เดือน</button>
+        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('day')}>วัน</button>
+        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => goToView('agenda')}>กำหนดการ</button>
       </span>
     </div>
     </div>
@@ -140,11 +140,12 @@ function App() {
   return (
     <div className="App">
       <Navbar /> {/* Navigation bar component */}
-      <div className="container-fluid" style={{ marginTop: '20px' }}>
-        <h1 className="text-center mb-4">Booking Calendar</h1>
-        
+      <div className="container-fluid" style={{ marginTop: '40px' }}>
+        <div style={{height:'13vh' , backgroundColor:'gray' ,alignContent: 'center'}}>
+        <h1 className="" style={{backgroundColor: 'gray'}}>ปฏิทินจองห้อง</h1>
+        </div>
         {/* Badges for filtering events by RoomCenter */}
-        <div className="row justify-content-end mb-2">
+        <div className="row justify-content-end mb-2 mt-3">
           <div className="col-auto">
             <span 
               className='badge' 

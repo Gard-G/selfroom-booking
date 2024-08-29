@@ -13,53 +13,53 @@ const SelectCenterPage = () => {
   return (
     <div className="container">
         <Navbar/>
-      <div className="row text-center">
-        <h1 className="my-4">Select a Center</h1>
-        <div className="col-md-6 mb-4">
+      <div className="row text-center" style={{marginTop: '0px'}}>
+        <h1 className="my-4">เลือกศูนย์ที่จะจอง</h1>
+        <div className="col-md-3 mb-4">
           <div className="card" onClick={() => handleCenterClick('ศูนย์เทเวศร์')}>
-            <img
+            <img style={{height:'25vh',}}
               src="src/image/IMG_6489-2.jpg" // Replace with your image path
               className="card-img-top"
               alt="ศูนย์เทเวศร์"
             />
             <div className="card-body">
-              <h5 className="card-title">ศูนย์เทเวศร์</h5>
+              <h4 className="card-title">ศูนย์เทเวศร์</h4>
             </div>
           </div>
         </div>
-        <div className="col-md-6 mb-4">
+        <div className="col-md-3 mb-4">
           <div className="card" onClick={() => handleCenterClick('ศูนย์พณิชยการพระนคร')}>
-            <img
+            <img style={{height:'25vh'}}
               src="src/image/IMG_6489-2.jpg" // Replace with your image path
               className="card-img-top"
               alt="ศูนย์พณิชยการพระนคร"
             />
             <div className="card-body">
-              <h5 className="card-title">ศูนย์พณิชยการพระนคร</h5>
+              <h4 className="card-title">ศูนย์พณิชยการพระนคร</h4>
             </div>
           </div>
         </div>
-        <div className="col-md-6 mb-4">
+        <div className="col-md-3 mb-4">
           <div className="card" onClick={() => handleCenterClick('ศูนย์พระนครเหนือ')}>
-            <img
+            <img style={{height:'25vh'}}
               src="src/image/IMG_6489-2.jpg" // Replace with your image path
               className="card-img-top"
               alt="ศูนย์พระนครเหนือ"
             />
             <div className="card-body">
-              <h5 className="card-title">ศูนย์พระนครเหนือ</h5>
+              <h4 className="card-title">ศูนย์พระนครเหนือ</h4>
             </div>
           </div>
         </div>
-        <div className="col-md-6 mb-4">
+        <div className="col-md-3 mb-4">
           <div className="card" onClick={() => handleCenterClick('ศูนย์โชติเวช')}>
-            <img
+            <img style={{height:'25vh'}}
               src="src/image/IMG_6489-2.jpg" // Replace with your image path
               className="card-img-top"
               alt="ศูนย์โชติเวช"
             />
             <div className="card-body">
-              <h5 className="card-title">ศูนย์โชติเวช</h5>
+              <h4 className="card-title">ศูนย์โชติเวช</h4>
             </div>
           </div>
         </div>

@@ -101,14 +101,14 @@ const BookingPage = () => {
         <div className="card-body">
           <form onSubmit={handleSubmit}>
             <div className='form-group mb-3'>
-              <label htmlFor="room">Room:</label>
+              <label htmlFor="room">ห้อง:</label>
               <select
                 id="room"
                 className="form-control"
                 value={roomID}
                 onChange={(e) => setRoomID(e.target.value)}
               >
-                <option value="">Select Room</option>
+                <option value="">เลือกห้อง</option>
                 {filteredRooms.map(room => (
                   <option key={room.RoomID} value={room.RoomID}>{room.RoomName}</option>
                 ))}
@@ -116,7 +116,7 @@ const BookingPage = () => {
             </div>
 
             <div className='form-group mb-3'>
-              <label htmlFor="date">Date:</label>
+              <label htmlFor="date">วันที่:</label>
               <input
                 id="date"
                 type="date"
@@ -128,7 +128,7 @@ const BookingPage = () => {
 
             <div className='row'>
               <div className="form-group mb-3 col-lg-6 col-12">
-                <label htmlFor="startTime">Start Time:</label>
+                <label htmlFor="startTime">เวลาเริ่ม:</label>
                 <input
                   id="startTime"
                   type="time"
@@ -138,7 +138,7 @@ const BookingPage = () => {
                 />
               </div>
               <div className="form-group mb-3 col-lg-6 col-12">
-                <label htmlFor="endTime">End Time:</label>
+                <label htmlFor="endTime">ถึงเวลา:</label>
                 <input
                   id="endTime"
                   type="time"
@@ -150,7 +150,7 @@ const BookingPage = () => {
             </div>
 
             <div className="form-group mb-3">
-              <label htmlFor="name">Name:</label>
+              <label htmlFor="name">ชื่อ-นามสกุล:</label>
               <input
                 id="name"
                 type="text"
@@ -161,7 +161,7 @@ const BookingPage = () => {
             </div>
 
             <div className="form-group mb-3">
-              <label htmlFor="phone">Phone:</label>
+              <label htmlFor="phone">เบอร์โทร:</label>
               <input
                 id="phone"
                 type="text"
@@ -172,7 +172,7 @@ const BookingPage = () => {
             </div>
 
             <div className="form-group mb-4">
-              <label htmlFor="reason">Reason:</label>
+              <label htmlFor="reason">ใช้ทำอะไร:</label>
               <textarea
                 id="reason"
                 className="form-control"
