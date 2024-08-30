@@ -3,12 +3,12 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function LoginPage() {
-  const [Username, setUsername] = useState('');
+  const [username, setUsername] = useState('');
   const [Password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!Username || !Password) {
+    if (!username || !Password) {
       alert('Please fill in both fields');
       return;
     }
@@ -16,11 +16,11 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/login', { Username, Password });
+      const response = await axios.post('/api/login', { username, Password });
       const { token, IDstatus } = response.data; // Extract token and IDstatus from response
 
       localStorage.setItem('token', token);
-      localStorage.setItem('username', Username); // Store the username
+      localStorage.setItem('username', username); // Store the username
       localStorage.setItem('IDstatus', IDstatus); // Store the IDstatus
 
       window.location.href = '/status-orders'; // Redirect to status orders page
@@ -45,7 +45,7 @@ function LoginPage() {
             id="username"
             className="form-control"
             placeholder="Enter your username"
-            value={Username}
+            value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>

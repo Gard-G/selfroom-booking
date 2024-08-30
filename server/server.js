@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
+const ldap = require('ldapjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
@@ -135,7 +136,50 @@ app.post('/api/test', (req, res) => {
   res.send('Test route works!');
 });
 
-// Route to login
+
+// Route to login with Active Directory
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const client = ldap.createClient({
+    url: 'ldap://203.158.239.141' // Replace with your AD server address
+  });
+
+  const dn = `${username}@rmutp.ac.th`; // Format the username with your domain
+
+  client.bind(dn, password, (err) => {
+    if (err) {
+      console.error('LDAP bind failed:', err);
+      return res.status(401).send('Invalid credentials');
+    }
+
+    // LDAP bind successful
+    // Now check if the username exists in the adminlist table
+    const query = 'SELECT * FROM adminlist WHERE username = ?';
+    connection.query(query, [username], (error, results) => {
+      if (error) {
+        console.error('Error querying adminlist:', error);
+        return res.status(500).send('Error checking admin status');
+      }
+
+      // If username is found in adminlist, set IDstatus to 'admin', otherwise 'user'
+      const IDstatus = results.length > 0 ? 'admin' : 'user';
+
+      // Generate a token with the username and IDstatus
+      const token = jwt.sign({ username, IDstatus }, 'your_jwt_secret', { expiresIn: '1h' });
+
+      // Send the token and IDstatus as response
+      res.json({ token, IDstatus });
+
+      client.unbind(); // Close the LDAP connection
+    });
+  });
+});
+
+
+
+/*
+// Route to login with mysql
 app.post('/api/login', (req, res) => {
   const { Username, Password } = req.body;
 
@@ -159,7 +203,7 @@ app.post('/api/login', (req, res) => {
     res.json({ token, IDstatus: user.IDstatus  });
   });
 });
-
+*/
 
 
 
