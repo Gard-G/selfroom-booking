@@ -31,6 +31,32 @@ const StatusOrderPage = () => {
       });
   }, []);
 
+  const handleDelete = (orderId) => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('You need to log in first');
+      return;
+    }
+
+    const confirmDelete = window.confirm('Are you sure you want to delete this order?');
+
+    if (confirmDelete) {
+      axios.delete(`/api/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(() => {
+          // Remove the deleted order from the state
+          setOrders(orders.filter(order => order.OrderBooking !== orderId));
+          alert('Order deleted successfully');
+        })
+        .catch(error => {
+          console.error('Error deleting order:', error);
+          alert('Failed to delete order. Please try again later.');
+        });
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -53,6 +79,7 @@ const StatusOrderPage = () => {
                 <th>เวลาเริ่ม</th>
                 <th>ถึงเวลา</th>
                 <th>สถานะ</th>
+                <th>Action</th> {/* New column for actions */}
               </tr>
             </thead>
             <tbody className='table-info'>
@@ -64,6 +91,14 @@ const StatusOrderPage = () => {
                   <td>{order.Start}</td>
                   <td>{order.End}</td>
                   <td>{order.Status}</td>
+                  <td>
+                    <button 
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(order.OrderBooking)}
+                    >
+                      ลบ
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

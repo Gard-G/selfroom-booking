@@ -4,10 +4,13 @@ const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const ldap = require('ldapjs');
 const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const SECRET_KEY = 'secret'; // Replace with your actual secret key
+const SECRET_KEY = 'your_jwt_secret'; // Ensure consistency
+
 
 app.use(cors());
 app.use(express.json());
@@ -60,25 +63,31 @@ app.get('/api/users', authenticateToken, (req, res) => {
 });
 
 // Add a new user
-app.post('/api/users', authenticateToken, (req, res) => {
+app.post('/api/users', authenticateToken, async (req, res) => {
   const { Username, Password, IDstatus } = req.body;
 
   if (!Username || !Password || !IDstatus) {
     return res.status(400).send('Missing required fields');
   }
- 
+
+  try {
+    const hashedPassword = await bcrypt.hash(Password, 10);
     const query = 'INSERT INTO user (Username, Password, IDstatus) VALUES (?, ?, ?)';
-    connection.query(query, [Username, Password, IDstatus], (error) => {
+    connection.query(query, [Username, hashedPassword, IDstatus], (error) => {
       if (error) {
         console.error('Error adding user:', error);
         return res.status(500).send('Server error');
       }
       res.status(201).send('User created successfully');
-  });
-}); 
+    });
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    res.status(500).send('Server error');
+  }
+});
 
 // Edit an existing user
-app.put('/api/users/:id', authenticateToken, (req, res) => {
+app.put('/api/users/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { Username, Password, IDstatus } = req.body;
 
@@ -89,24 +98,29 @@ app.put('/api/users/:id', authenticateToken, (req, res) => {
   const updateQuery = 'UPDATE user SET Username = ?, IDstatus = ? WHERE UserID = ?';
   const queryParams = [Username, IDstatus, id];
 
-  if (Password) {
-
+  try {
+    if (Password) {
+      const hashedPassword = await bcrypt.hash(Password, 10);
       const updateQueryWithPassword = 'UPDATE user SET Username = ?, Password = ?, IDstatus = ? WHERE UserID = ?';
-      connection.query(updateQueryWithPassword, [Username, Password, IDstatus, id], (error) => {
+      connection.query(updateQueryWithPassword, [Username, hashedPassword, IDstatus, id], (error) => {
         if (error) {
           console.error('Error updating user:', error);
           return res.status(500).send('Server error');
         }
         res.send('User updated successfully');
       });
-  } else {
-    connection.query(updateQuery, queryParams, (error) => {
-      if (error) {
-        console.error('Error updating user:', error);
-        return res.status(500).send('Server error');
-      }
-      res.send('User updated successfully');
-    });
+    } else {
+      connection.query(updateQuery, queryParams, (error) => {
+        if (error) {
+          console.error('Error updating user:', error);
+          return res.status(500).send('Server error');
+        }
+        res.send('User updated successfully');
+      });
+    }
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    res.status(500).send('Server error');
   }
 });
 
@@ -130,84 +144,49 @@ app.delete('/api/users/:id', authenticateToken, (req, res) => {
   });
 });
 
-
 // Test route
 app.post('/api/test', (req, res) => {
   res.send('Test route works!');
 });
-
 
 // Route to login with Active Directory
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
   const client = ldap.createClient({
-    url: 'ldap://203.158.239.141' // Replace with your AD server address
+    url: 'ldap://203.158.239.97'  // เปลี่ยนเป็น LDAPS ถ้าจำเป็น
   });
 
-  const dn = `${username}@rmutp.ac.th`; // Format the username with your domain
+  const dn = `${username}@rmutp.ac.th`;  // ใช้ UPN
 
   client.bind(dn, password, (err) => {
     if (err) {
-      console.error('LDAP bind failed:', err);
-      return res.status(401).send('Invalid credentials');
+      console.error('LDAP bind failed:', err.message);
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // LDAP bind successful
-    // Now check if the username exists in the adminlist table
-    const query = 'SELECT * FROM adminlist WHERE username = ?';
+    const query = 'SELECT * FROM adminlist WHERE Username = ?';
     connection.query(query, [username], (error, results) => {
       if (error) {
         console.error('Error querying adminlist:', error);
         return res.status(500).send('Error checking admin status');
       }
 
-      // If username is found in adminlist, set IDstatus to 'admin', otherwise 'user'
       const IDstatus = results.length > 0 ? 'admin' : 'user';
+      const token = jwt.sign({ username, IDstatus }, SECRET_KEY, { expiresIn: '1h' });
 
-      // Generate a token with the username and IDstatus
-      const token = jwt.sign({ username, IDstatus }, 'your_jwt_secret', { expiresIn: '1h' });
-
-      // Send the token and IDstatus as response
       res.json({ token, IDstatus });
-
-      client.unbind(); // Close the LDAP connection
+      client.unbind();
     });
   });
 });
 
 
 
-/*
-// Route to login with mysql
-app.post('/api/login', (req, res) => {
-  const { Username, Password } = req.body;
-
-  const query = 'SELECT * FROM user WHERE Username = ?';
-  connection.query(query, [Username], (error, results) => {
-    if (error) {
-      return res.status(500).send('Error fetching data from database');
-    }
-    if (results.length === 0) {
-      return res.status(401).send('Invalid credentials');
-    }
-
-    const user = results[0];
-
-    // Direct comparison if passwords are not hashed
-    if (Password !== user.Password) {
-      return res.status(401).send('Invalid credentials');
-    }
-
-    const token = jwt.sign({ UserID: user.UserID, IDstatus: user.IDstatus }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token, IDstatus: user.IDstatus  });
-  });
-});
-*/
 
 
 
-  
+
 // Route to fetch user info
 app.get('/api/user-info', authenticateToken, (req, res) => {
   // `req.user` contains the user data after authentication
@@ -216,7 +195,7 @@ app.get('/api/user-info', authenticateToken, (req, res) => {
 
 // Route to Fetch Orders by User
 app.get('/api/user-orders', authenticateToken, (req, res) => {
-  const userID = req.user.UserID;
+  const userID = req.user.username; // Adjust if needed
 
   const query = `
     SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Status, lr.RoomName
@@ -280,12 +259,11 @@ app.get('/api/wait-bookings', (req, res) => {
     // Format the date fields BEFORE sending the response
     const formattedResults = results.map(booking => ({
       ...booking,
-      Date: new Date(booking.Date).toLocaleDateString(), // Formatting Date
-      Start: new Date(booking.Start).toLocaleTimeString(), // Formatting Start Time
-      End: new Date(booking.End).toLocaleTimeString() // Formatting End Time
+      Date: new Date(booking.Date).toLocaleDateString(),
+      Start: new Date(booking.Start).toLocaleTimeString(),
+      End: new Date(booking.End).toLocaleTimeString()
     }));
     
-    // Send the formatted results as the response
     res.json(formattedResults);
   });
 });
@@ -304,6 +282,37 @@ app.put('/api/update-booking-status', (req, res) => {
   });
 });
 
+// API endpoint to delete an order
+app.delete('/api/orders/:id', (req, res) => {
+  const { id } = req.params;
+
+  // First delete any references in the userlistorder table
+  const deleteReferencesQuery = 'DELETE FROM userlistorder WHERE OrderBooking = ?';
+  
+  connection.query(deleteReferencesQuery, [id], (error) => {
+    if (error) {
+      console.error('Error deleting references:', error);
+      return res.status(500).json({ message: 'Failed to delete references. Please try again later.' });
+    }
+
+    // Now delete the order
+    const deleteOrderQuery = 'DELETE FROM orderbooking WHERE OrderBooking = ?';
+    
+    connection.query(deleteOrderQuery, [id], (error, results) => {
+      if (error) {
+        console.error('Error deleting order:', error);
+        return res.status(500).json({ message: 'Failed to delete order. Please try again later.' });
+      }
+
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+
+      res.status(200).json({ message: 'Order deleted successfully' });
+    });
+  });
+});
+
 // Route to fetch rooms
 app.get('/api/rooms', (req, res) => {
   const query = 'SELECT * FROM listroom';
@@ -316,7 +325,7 @@ app.get('/api/rooms', (req, res) => {
   });
 });
 
-// Route to fetch room centers (replace this if your centers are static)
+// Route to fetch room centers
 app.get('/api/room-centers', (req, res) => {
   const roomCenters = ['ศูนย์เทเวศร์', 'ศูนย์พณิชยการพระนคร', 'ศูนย์พระนครเหนือ', 'ศูนย์โชติเวช'];
   res.json(roomCenters);
@@ -343,8 +352,8 @@ app.post('/api/add-room', authenticateToken, (req, res) => {
 // Route to create a new booking
 app.post('/api/bookings', authenticateToken, (req, res) => {
   const { RoomID, Date, Start, End, Name, Phone, Reason } = req.body;
-  const userID = req.user.UserID; // Get the UserID from the authenticated token
-  
+  const userID = req.user.username; // Ensure userID is correct
+
   if (!RoomID || !Date || !Start || !End || !Name || !Phone || !Reason) {
     return res.status(400).send('Missing required fields');
   }
@@ -358,11 +367,10 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
       return res.status(500).json({ error: 'Error creating booking', details: error });
     }
 
-    const orderBookingID = results.insertId; // Get the ID of the newly created booking
+    const orderBookingID = results.insertId;
 
-    // Insert into userlistorder
     const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
-    connection.query(userListOrderQuery, [userID, orderBookingID], (error, results) => {
+    connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
       if (error) {
         console.error('Error inserting into userlistorder:', error);
         return res.status(500).json({ error: 'Error linking user to booking', details: error });

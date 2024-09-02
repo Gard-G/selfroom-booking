@@ -27,7 +27,7 @@ root.render(
         <Route path="/login" element={<Login />} />
         <Route path="/status-orders" element={<StatusOrderPage />} />
         <Route path="/add-rooms" element={<AddRoomPage />} />
-        <Route path="/User-Manage" element={<UserManagement />} />
+        
         <Route path="/SelectCenter" element={<SelectCenterPage />} />
         <Route path="/testapp" element={<Testapp />} />
       </Routes>

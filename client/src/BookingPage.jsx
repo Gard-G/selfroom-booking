@@ -3,7 +3,7 @@ import axios from 'axios';
 import Navbar from './components/nevbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const BookingPage = () => {
   const [rooms, setRooms] = useState([]);
@@ -17,6 +17,8 @@ const BookingPage = () => {
   const [reason, setReason] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Add state to check if user is logged in
+  const navigate = useNavigate(); // Use navigate for redirection
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -25,8 +27,8 @@ const BookingPage = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('You need to log in first');
-      window.location.href = '/login';
+      setIsLoggedIn(false);
+      navigate('/login'); // Redirect to login if not logged in
       return;
     }
 
@@ -41,7 +43,7 @@ const BookingPage = () => {
       .catch(error => {
         console.error('Error fetching rooms:', error);
       });
-  }, [selectedCenter]);
+  }, [selectedCenter, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -77,11 +79,11 @@ const BookingPage = () => {
         setName('');
         setPhone('');
         setReason('');
-        handleShowModal('User updated successfully');
+        handleShowModal('Booking created successfully');
       })
       .catch(error => {
         console.error('Error creating booking:', error.response ? error.response.data : error.message);
-        alert('Failed to create booking.');
+        handleShowModal('Failed to create booking.');
       });
   };
 
@@ -94,7 +96,7 @@ const BookingPage = () => {
   return (
     <div className='container'>
       <Navbar />
-      <div className="card card-container bg-dark text-white rounded" >
+      <div className="card card-container bg-dark text-white rounded">
         <div className="card-header">
           <h2>จองห้อง {selectedCenter}</h2> {/* Display the selected center */}
         </div>
