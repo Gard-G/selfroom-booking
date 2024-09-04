@@ -145,7 +145,7 @@ function App() {
         <h1 className="" style={{backgroundColor: 'gray'}}>ปฏิทินจองห้อง</h1>
         </div>
         {/* Badges for filtering events by RoomCenter */}
-        <div className="row justify-content-end mb-2 mt-3">
+        <div className="row justify-content-end mb-3 mt-3">
           <div className="col-auto">
             <span 
               className='badge' 

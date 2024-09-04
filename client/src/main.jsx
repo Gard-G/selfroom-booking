@@ -14,6 +14,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import UserManagement from './UManage';
 import SelectCenterPage from './SelectCenterPage';
 import Testapp from './test';
+import RoomDetailsPage from './RoomDetailsPage';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 
@@ -27,7 +28,7 @@ root.render(
         <Route path="/login" element={<Login />} />
         <Route path="/status-orders" element={<StatusOrderPage />} />
         <Route path="/add-rooms" element={<AddRoomPage />} />
-        
+        <Route path="/select-rooms" element={<RoomDetailsPage />} />
         <Route path="/SelectCenter" element={<SelectCenterPage />} />
         <Route path="/testapp" element={<Testapp />} />
       </Routes>

@@ -315,21 +315,64 @@ app.delete('/api/orders/:id', (req, res) => {
 
 // Route to fetch rooms
 app.get('/api/rooms', (req, res) => {
-  const query = 'SELECT * FROM listroom';
-  connection.query(query, (error, results) => {
+  const selectedCenter = req.query.center;
+  // Query your database for rooms based on the selectedCenter
+  connection.query('SELECT * FROM listroom WHERE RoomCenter = ?', [selectedCenter], (error, results) => {
     if (error) {
-      res.status(500).send('Error fetching rooms from database');
-      return;
+      console.error('Error fetching rooms:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
     res.json(results);
   });
 });
+
 
 // Route to fetch room centers
 app.get('/api/room-centers', (req, res) => {
   const roomCenters = ['ศูนย์เทเวศร์', 'ศูนย์พณิชยการพระนคร', 'ศูนย์พระนครเหนือ', 'ศูนย์โชติเวช'];
   res.json(roomCenters);
 });
+
+// Route to fetch rooms by center
+app.get('/api/rooms-by-center', (req, res) => {
+  const center = req.query.center;
+
+  if (!center) {
+    return res.status(400).send('Center is required');
+  }
+
+  const query = 'SELECT * FROM listroom WHERE RoomCenter = ?';
+  connection.query(query, [center], (error, results) => {
+    if (error) {
+      console.error('Error fetching rooms by center:', error);
+      return res.status(500).send('Error fetching rooms');
+    }
+    res.json(results);
+  });
+});
+
+
+// Route to fetch room details by ID
+app.get('/api/rooms/:id', (req, res) => {
+  const roomID = req.params.id;
+
+  if (!roomID) {
+    return res.status(400).send('Room ID is required');
+  }
+
+  const query = 'SELECT * FROM listroom WHERE RoomID = ?';
+  connection.query(query, [roomID], (error, results) => {
+    if (error) {
+      console.error('Error fetching room details:', error);
+      return res.status(500).send('Error fetching room details');
+    }
+    if (results.length === 0) {
+      return res.status(404).send('Room not found');
+    }
+    res.json(results[0]);
+  });
+});
+
 
 // Route to add a new room
 app.post('/api/add-room', authenticateToken, (req, res) => {
@@ -379,6 +422,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     });
   });
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
