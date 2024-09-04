@@ -82,26 +82,26 @@ const StatusOrderPage = () => {
                 <th>Action</th> {/* New column for actions */}
               </tr>
             </thead>
-            <tbody className='table-info'>
-              {orders.map(order => (
-                <tr key={order.OrderBooking}>
-                  <td>{order.RoomName}</td>
-                  <td>{order.Name}</td>
-                  <td>{order.Date}</td>
-                  <td>{order.Start}</td>
-                  <td>{order.End}</td>
-                  <td>{order.Status}</td>
-                  <td>
-                    <button 
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(order.OrderBooking)}
-                    >
-                      ลบ
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+              <tbody className='table-info'>
+                {orders.map(order => (
+                  <tr key={order.OrderBooking}>
+                    <td>{order.RoomName}</td>
+                    <td>{order.Name}</td>
+                    <td>{order.Date}</td>
+                    <td>{order.Start}</td>
+                    <td>{order.End}</td>
+                    <td>{order.Status}</td>
+                    <td>
+                      <button 
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(order.OrderBooking)}
+                      >
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
           </table>
         )}
       </div>

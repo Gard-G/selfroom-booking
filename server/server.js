@@ -48,105 +48,16 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// User Management Endpoints
-
-// Get all users
-app.get('/api/users', authenticateToken, (req, res) => {
-  const query = 'SELECT UserID, Username, IDstatus FROM user';
-  connection.query(query, (error, results) => {
-    if (error) {
-      console.error('Error fetching users:', error);
-      return res.status(500).send('Server error');
-    }
-    res.json(results);
-  });
-});
-
-// Add a new user
-app.post('/api/users', authenticateToken, async (req, res) => {
-  const { Username, Password, IDstatus } = req.body;
-
-  if (!Username || !Password || !IDstatus) {
-    return res.status(400).send('Missing required fields');
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(Password, 10);
-    const query = 'INSERT INTO user (Username, Password, IDstatus) VALUES (?, ?, ?)';
-    connection.query(query, [Username, hashedPassword, IDstatus], (error) => {
-      if (error) {
-        console.error('Error adding user:', error);
-        return res.status(500).send('Server error');
-      }
-      res.status(201).send('User created successfully');
-    });
-  } catch (error) {
-    console.error('Error hashing password:', error);
-    res.status(500).send('Server error');
-  }
-});
-
-// Edit an existing user
-app.put('/api/users/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const { Username, Password, IDstatus } = req.body;
-
-  if (!Username || !IDstatus) {
-    return res.status(400).send('Missing required fields');
-  }
-
-  const updateQuery = 'UPDATE user SET Username = ?, IDstatus = ? WHERE UserID = ?';
-  const queryParams = [Username, IDstatus, id];
-
-  try {
-    if (Password) {
-      const hashedPassword = await bcrypt.hash(Password, 10);
-      const updateQueryWithPassword = 'UPDATE user SET Username = ?, Password = ?, IDstatus = ? WHERE UserID = ?';
-      connection.query(updateQueryWithPassword, [Username, hashedPassword, IDstatus, id], (error) => {
-        if (error) {
-          console.error('Error updating user:', error);
-          return res.status(500).send('Server error');
-        }
-        res.send('User updated successfully');
-      });
-    } else {
-      connection.query(updateQuery, queryParams, (error) => {
-        if (error) {
-          console.error('Error updating user:', error);
-          return res.status(500).send('Server error');
-        }
-        res.send('User updated successfully');
-      });
-    }
-  } catch (error) {
-    console.error('Error hashing password:', error);
-    res.status(500).send('Server error');
-  }
-});
-
-// Delete an existing user
-app.delete('/api/users/:id', authenticateToken, (req, res) => {
-  const { id } = req.params;
-
-  const deleteQuery = 'DELETE FROM user WHERE UserID = ?';
-
-  connection.query(deleteQuery, [id], (error, results) => {
-    if (error) {
-      console.error('Error deleting user:', error);
-      return res.status(500).send('Server error');
-    }
-
-    if (results.affectedRows === 0) {
-      return res.status(404).send('User not found');
-    }
-
-    res.send('User deleted successfully');
-  });
-});
 
 // Test route
 app.post('/api/test', (req, res) => {
   res.send('Test route works!');
+});
+
+// Route to fetch user info
+app.get('/api/user-info', authenticateToken, (req, res) => {
+  // `req.user` contains the user data after authentication
+  res.json(req.user);
 });
 
 // Route to login with Active Directory
@@ -181,17 +92,6 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-
-
-
-
-
-
-// Route to fetch user info
-app.get('/api/user-info', authenticateToken, (req, res) => {
-  // `req.user` contains the user data after authentication
-  res.json(req.user);
-});
 
 // Route to Fetch Orders by User
 app.get('/api/user-orders', authenticateToken, (req, res) => {
@@ -333,24 +233,6 @@ app.get('/api/room-centers', (req, res) => {
   res.json(roomCenters);
 });
 
-// Route to fetch rooms by center
-app.get('/api/rooms-by-center', (req, res) => {
-  const center = req.query.center;
-
-  if (!center) {
-    return res.status(400).send('Center is required');
-  }
-
-  const query = 'SELECT * FROM listroom WHERE RoomCenter = ?';
-  connection.query(query, [center], (error, results) => {
-    if (error) {
-      console.error('Error fetching rooms by center:', error);
-      return res.status(500).send('Error fetching rooms');
-    }
-    res.json(results);
-  });
-});
-
 
 // Route to fetch room details by ID
 app.get('/api/rooms/:id', (req, res) => {
@@ -373,6 +255,44 @@ app.get('/api/rooms/:id', (req, res) => {
   });
 });
 
+
+// Route to fetch room details and bookings by room ID
+app.get('/api/room-details/:id', (req, res) => {
+  const roomID = req.params.id;
+
+  if (!roomID) {
+    return res.status(400).send('Room ID is required');
+  }
+
+  const roomQuery = 'SELECT * FROM listroom WHERE RoomID = ?';
+  const bookingsQuery = `
+    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Status
+    FROM orderbooking ob
+    WHERE ob.RoomID = ?
+  `;
+
+  connection.query(roomQuery, [roomID], (error, roomResults) => {
+    if (error) {
+      console.error('Error fetching room details:', error);
+      return res.status(500).send('Error fetching room details');
+    }
+    if (roomResults.length === 0) {
+      return res.status(404).send('Room not found');
+    }
+
+    connection.query(bookingsQuery, [roomID], (error, bookingResults) => {
+      if (error) {
+        console.error('Error fetching bookings:', error);
+        return res.status(500).send('Error fetching bookings');
+      }
+
+      res.json({
+        room: roomResults[0],
+        bookings: bookingResults
+      });
+    });
+  });
+});
 
 // Route to add a new room
 app.post('/api/add-room', authenticateToken, (req, res) => {
