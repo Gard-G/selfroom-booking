@@ -23,6 +23,22 @@ const SelectCenterPage = () => {
     navigate(`/select-rooms?center=${center}`);
   };
 
+  // Function to get the image based on the center name
+  const getImageForCenter = (center) => {
+    switch (center) {
+      case 'ศูนย์เทเวศร์':
+        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+      case 'ศูนย์พณิชยการพระนคร':
+        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+      case 'ศูนย์พระนครเหนือ':
+        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+      case 'ศูนย์โชติเวช':
+        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+      default:
+        return 'src/image/IMG_6489-2.jpg'; // Default image
+    }
+  };
+
   return (
     <div className="container">
       <Navbar />
@@ -33,7 +49,7 @@ const SelectCenterPage = () => {
             <div className="card" onClick={() => handleCenterClick(center)}>
               <img 
                 style={{ height: '25vh' }}
-                src={`src/image/IMG_6489-2.jpg`} // Replace with a dynamic path if needed
+                src={getImageForCenter(center)} // Use the dynamic image based on the center
                 className="card-img-top"
                 alt={center}
               />
