@@ -227,11 +227,66 @@ app.get('/api/rooms', (req, res) => {
 });
 
 
+
 // Route to fetch room centers
 app.get('/api/room-centers', (req, res) => {
   const roomCenters = ['ศูนย์เทเวศร์', 'ศูนย์พณิชยการพระนคร', 'ศูนย์พระนครเหนือ', 'ศูนย์โชติเวช'];
   res.json(roomCenters);
 });
+
+app.get('/api/rooms-with-bookings', (req, res) => {
+  const selectedCenter = req.query.center;
+  const currentDate = new Date().toISOString().slice(0, 10);  // Get current date in 'YYYY-MM-DD' format
+  const currentTime = new Date().toISOString().slice(11, 19); // Get current time in 'HH:MM:SS' format
+
+  // Query to fetch rooms with their bookings
+  const query = `
+    SELECT lr.RoomID, lr.RoomName, lr.DetailRoom, ob.OrderBooking, ob.Date, ob.Start, ob.End, ob.Status
+    FROM listroom lr
+    LEFT JOIN orderbooking ob ON lr.RoomID = ob.RoomID 
+    AND (ob.Date > ? OR (ob.Date = ? AND ob.End >= ?))
+    WHERE lr.RoomCenter = ?
+    ORDER BY lr.RoomID, ob.Start
+  `;
+
+  connection.query(query, [currentDate, currentDate, currentTime, selectedCenter], (error, results) => {
+    if (error) {
+      console.error('Error fetching rooms with bookings:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    // Group bookings by room
+    const rooms = [];
+    const roomMap = {};
+
+    results.forEach(row => {
+      if (!roomMap[row.RoomID]) {
+        roomMap[row.RoomID] = {
+          RoomID: row.RoomID,
+          RoomName: row.RoomName,
+          DetailRoom: row.DetailRoom,
+          bookings: [],
+        };
+        rooms.push(roomMap[row.RoomID]);
+      }
+      if (row.OrderBooking) {
+        roomMap[row.RoomID].bookings.push({
+          OrderBooking: row.OrderBooking,
+          Date: row.Date,
+          Start: row.Start,
+          End: row.End,
+          Status: row.Status,
+        });
+      }
+    });
+
+    res.json(rooms);
+  });
+});
+
+
+
+
 
 
 // Route to fetch room details by ID
@@ -256,43 +311,6 @@ app.get('/api/rooms/:id', (req, res) => {
 });
 
 
-// Route to fetch room details and bookings by room ID
-app.get('/api/room-details/:id', (req, res) => {
-  const roomID = req.params.id;
-
-  if (!roomID) {
-    return res.status(400).send('Room ID is required');
-  }
-
-  const roomQuery = 'SELECT * FROM listroom WHERE RoomID = ?';
-  const bookingsQuery = `
-    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Status
-    FROM orderbooking ob
-    WHERE ob.RoomID = ?
-  `;
-
-  connection.query(roomQuery, [roomID], (error, roomResults) => {
-    if (error) {
-      console.error('Error fetching room details:', error);
-      return res.status(500).send('Error fetching room details');
-    }
-    if (roomResults.length === 0) {
-      return res.status(404).send('Room not found');
-    }
-
-    connection.query(bookingsQuery, [roomID], (error, bookingResults) => {
-      if (error) {
-        console.error('Error fetching bookings:', error);
-        return res.status(500).send('Error fetching bookings');
-      }
-
-      res.json({
-        room: roomResults[0],
-        bookings: bookingResults
-      });
-    });
-  });
-});
 
 // Route to add a new room
 app.post('/api/add-room', authenticateToken, (req, res) => {
