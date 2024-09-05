@@ -9,33 +9,43 @@ const SelectCenterPage = () => {
   const [centers, setCenters] = useState([]);
 
   useEffect(() => {
-    // Fetch centers from the server
-    axios.get('/api/room-centers')
-      .then(response => {
+    const checkAuthentication = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert ('โปรดlogin')
+          navigate('/login'); // Redirect to login if no token
+          return;
+        }
+        
+        // Fetch centers only if authenticated
+        const response = await axios.get('/api/room-centers');
         setCenters(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching centers:', error);
-      });
-  }, []);
+      } catch (error) {
+        console.error('Error verifying authentication or fetching centers:', error);
+        navigate('/login'); // Redirect to login on error
+      }
+    };
+
+    checkAuthentication();
+  }, [navigate]);
 
   const handleCenterClick = (center) => {
     navigate(`/select-rooms?center=${center}`);
   };
 
-  // Function to get the image based on the center name
   const getImageForCenter = (center) => {
     switch (center) {
       case 'ศูนย์เทเวศร์':
-        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+        return 'src/image/IMG_6489-2.jpg';
       case 'ศูนย์พณิชยการพระนคร':
-        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+        return 'src/image/IMG_6489-2.jpg';
       case 'ศูนย์พระนครเหนือ':
-        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+        return 'src/image/IMG_6489-2.jpg';
       case 'ศูนย์โชติเวช':
-        return 'src/image/IMG_6489-2.jpg'; // Replace with the actual path
+        return 'src/image/IMG_6489-2.jpg';
       default:
-        return 'src/image/IMG_6489-2.jpg'; // Default image
+        return 'src/image/IMG_6489-2.jpg';
     }
   };
 
@@ -49,7 +59,7 @@ const SelectCenterPage = () => {
             <div className="card" onClick={() => handleCenterClick(center)}>
               <img 
                 style={{ height: '25vh' }}
-                src={getImageForCenter(center)} // Use the dynamic image based on the center
+                src={getImageForCenter(center)}
                 className="card-img-top"
                 alt={center}
               />

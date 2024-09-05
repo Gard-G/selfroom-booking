@@ -35,7 +35,7 @@ const BookingPage = () => {
     event.preventDefault();
 
     if (!date || !startTime || !endTime || !name || !phone || !reason) {
-      alert('Please fill in all fields.');
+      handleShowModal('Please fill in all fields.');
       return;
     }
 
@@ -74,7 +74,9 @@ const BookingPage = () => {
   return (
     <div className="container">
       <Navbar />
-      <h1>Book Room {room ? room.RoomName : ''}</h1>
+      <div className='mb-5'></div>
+      <div className='card  bg-dark text-white'>
+      <h1 className="mt-4 mb-4">จองห้อง {room ? room.RoomName : ''}</h1>
       <form onSubmit={handleSubmit}>
         <div className='form-group mb-3'>
           <label htmlFor="date">Date:</label>
@@ -143,14 +145,15 @@ const BookingPage = () => {
           />
         </div>
 
-        <button type="submit" className="btn btn-outline-success btn-block">
+        <button type="submit" className="btn btn-success btn-block">
           Book Room
         </button>
       </form>
+
       {showModal && (
         <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
           <div className="modal-dialog" role="document">
-            <div className="modal-content bg-success">
+            <div className="modal-content bg-success text-white">
               <div className="modal-header">
                 <h5 className="modal-title">Notification</h5>
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
@@ -159,12 +162,13 @@ const BookingPage = () => {
                 {modalContent}
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Close</button>
+                <button type="button" className="btn btn-light" onClick={handleCloseModal}>Close</button>
               </div>
             </div>
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

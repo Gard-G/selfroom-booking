@@ -59,7 +59,7 @@
 }
 
 .card-container {
-  width: 50vw;
+  width: 45vw;
   max-width: 100vw; /* Ensure it takes full width by default */
   margin: 0 auto;
   margin-top: 50px;

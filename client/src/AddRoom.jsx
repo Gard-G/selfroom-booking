@@ -7,6 +7,7 @@ import Navbar from './components/nevbar';
 const AddRoomPage = () => {
   const [roomName, setRoomName] = useState('');
   const [roomCenter, setRoomCenter] = useState('');
+  const [detailRoom, setDetailRoom] = useState(''); // New state for DetailRoom
   const [centers, setCenters] = useState([]);
   const navigate = useNavigate();
 
@@ -45,7 +46,7 @@ const AddRoomPage = () => {
       const token = localStorage.getItem('token');
       await axios.post(
         'http://localhost:5000/api/add-room',
-        { RoomName: roomName, RoomCenter: roomCenter },
+        { RoomName: roomName, RoomCenter: roomCenter, DetailRoom: detailRoom }, // Include DetailRoom
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -55,6 +56,7 @@ const AddRoomPage = () => {
       alert('Room added successfully!');
       setRoomName('');
       setRoomCenter('');
+      setDetailRoom(''); // Clear DetailRoom field
     } catch (error) {
       console.error('Error adding room:', error);
       alert('Failed to add room.');
@@ -95,6 +97,16 @@ const AddRoomPage = () => {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="form-group mb-3">
+              <label htmlFor="detailRoom">รายละเอียดห้อง:</label>
+              <textarea
+                id="detailRoom"
+                className="form-control"
+                value={detailRoom}
+                onChange={(e) => setDetailRoom(e.target.value)}
+                rows="3"
+              />
             </div>
             <button type="submit" className="btn btn-outline-success btn-block">Add Room</button>
           </form>

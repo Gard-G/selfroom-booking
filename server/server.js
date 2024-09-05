@@ -314,14 +314,14 @@ app.get('/api/rooms/:id', (req, res) => {
 
 // Route to add a new room
 app.post('/api/add-room', authenticateToken, (req, res) => {
-  const { RoomName, RoomCenter } = req.body;
+  const { RoomName, RoomCenter, DetailRoom } = req.body;
 
-  if (!RoomName || !RoomCenter) {
+  if (!RoomName || !RoomCenter || !DetailRoom) {
     return res.status(400).send('Missing required fields');
   }
 
-  const query = 'INSERT INTO listroom (RoomName, RoomCenter) VALUES (?, ?)';
-  connection.query(query, [RoomName, RoomCenter], (error) => {
+  const query = 'INSERT INTO listroom (RoomName, RoomCenter, DetailRoom) VALUES (?, ?, ?)';
+  connection.query(query, [RoomName, RoomCenter, DetailRoom], (error) => {
     if (error) {
       res.status(500).send('Error adding room to database');
       return;

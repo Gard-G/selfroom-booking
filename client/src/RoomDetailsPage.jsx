@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from './components/nevbar';
 import { useLocation, useNavigate } from 'react-router-dom';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const RoomDetailsPage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedRoomIDs, setExpandedRoomIDs] = useState(new Set()); // Track expanded room IDs
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -31,51 +31,80 @@ const RoomDetailsPage = () => {
     navigate(`/booking?center=${selectedCenter}&room=${roomID}`);
   };
 
+  const toggleBookingDetails = (roomID) => {
+    setExpandedRoomIDs(prevExpandedRoomIDs => {
+      const newExpandedRoomIDs = new Set(prevExpandedRoomIDs);
+      if (newExpandedRoomIDs.has(roomID)) {
+        newExpandedRoomIDs.delete(roomID); // Hide details
+      } else {
+        newExpandedRoomIDs.add(roomID); // Show details
+      }
+      return newExpandedRoomIDs;
+    });
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="container mt-5 text-center">Loading...</div>;
   }
 
   return (
-    <div className="container">
+    <div className="container mt-5">
       <Navbar />
-      <h1>Available Rooms at {selectedCenter}</h1>
+      <div style={{width:'65vw'}}>
+      <h1 className="mb-4">Available Rooms at {selectedCenter}</h1>
       <div className="row">
         {rooms.map(room => (
           <div className="col-md-6 mb-4" key={room.RoomID}>
             <div className="card">
               <div className="card-body">
                 <h3 className="card-title">{room.RoomName}</h3>
-                <p className="card-text">อุปกรณ์ในห้อง: {room.DetailRoom}</p>
-                
-                {/* Display bookings if available */}
-                {room.bookings && room.bookings.length > 0 ? (
+                <h6 className="card-text ">รายละเอียดห้อง:</h6>
+                <h6 className="card-text mb-4">{room.DetailRoom}</h6>
+                {/* Toggle button for booking details */}
+                {room.bookings && room.bookings.length > 0 && (
                   <div>
-                    <h5>การจอง:</h5>
+                    <button 
+                      className="btn btn-secondary mb-3"
+                      onClick={() => toggleBookingDetails(room.RoomID)}
+                    >
+                      {expandedRoomIDs.has(room.RoomID) ? 'วันเวลาที่มีคนกำลังจอง:' : 'วันเวลาที่มีคนกำลังจอง:'}
+                    </button>
                     
-                      {room.bookings.map((booking, index) => (
-                        <li key={index}>
-                          {new Date(booking.Start).toLocaleDateString()} 
-                          -เวลา {new Date(booking.Start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })} 
-                          - {new Date(booking.End).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-                        </li>
-                      ))}
-                    
+                    {expandedRoomIDs.has(room.RoomID) && (
+                      <div>
+                        
+                        <ul className="list-unstyled">
+                          {room.bookings.map((booking, index) => (
+                            <li key={index} className="mb-2">
+                              <span className="d-block">
+                                <strong>วันที่:</strong> {new Date(booking.Start).toLocaleDateString()}
+                              </span>
+                              <span className="d-block">
+                                <strong>เวลาเริ่ม:</strong> {new Date(booking.Start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                              </span>
+                              <span className="d-block">
+                                <strong>จนถึง:</strong> {new Date(booking.End).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <p>ไม่มีการจองสำหรับห้องนี้</p>
                 )}
 
                 <button 
-                  className="btn btn-primary"
+                  className="btn btn-primary mt-3"
                   onClick={() => handleRoomSelect(room.RoomID)}
                 >
-                  Select Room
+                  เลือกห้อง
                 </button>
               </div>
             </div>
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 };
