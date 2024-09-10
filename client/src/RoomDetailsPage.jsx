@@ -58,10 +58,11 @@ const RoomDetailsPage = () => {
             <div className="card">
               <div className="card-body">
                 <h3 className="card-title">{room.RoomName}</h3>
-                <h6 className="card-text ">รายละเอียดห้อง:</h6>
+                <h6 className="card-text">รายละเอียดห้อง:</h6>
                 <h6 className="card-text mb-4">{room.DetailRoom}</h6>
+                
                 {/* Toggle button for booking details */}
-                {room.bookings && room.bookings.length > 0 && (
+                {room.bookings && room.bookings.length > 0 ? (
                   <div>
                     <button 
                       className="btn btn-secondary mb-3"
@@ -72,7 +73,6 @@ const RoomDetailsPage = () => {
                     
                     {expandedRoomIDs.has(room.RoomID) && (
                       <div>
-                        
                         <ul className="list-unstyled">
                           {room.bookings.map((booking, index) => (
                             <li key={index} className="mb-2">
@@ -91,6 +91,8 @@ const RoomDetailsPage = () => {
                       </div>
                     )}
                   </div>
+                ) : (
+                  <h6>ยังไม่มีการจองสำหรับห้องนี้</h6>
                 )}
 
                 <button 

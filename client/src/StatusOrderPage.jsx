@@ -64,7 +64,7 @@ const StatusOrderPage = () => {
   return (
     <div>
       <Navbar />
-      <div className="container">
+      <div className="container mt-4">
         <h1>รายการจองของคุณ</h1>
         {error && <div className="alert alert-danger">{error}</div>}
         {orders.length === 0 ? (

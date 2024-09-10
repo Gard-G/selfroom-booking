@@ -56,7 +56,7 @@ const ApprovePage = () => {
   return (
     <div>
       <Navbar />
-      <div className="container ">
+      <div className="container mt-4">
         <h1>อนุมัติรายการจอง</h1>
         <div className="table-responsive">
           <table className='table table-bordered '>

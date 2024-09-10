@@ -39,11 +39,11 @@ const SelectCenterPage = () => {
       case 'ศูนย์เทเวศร์':
         return 'src/image/IMG_6489-2.jpg';
       case 'ศูนย์พณิชยการพระนคร':
-        return 'src/image/IMG_6489-2.jpg';
+        return 'src/image/ป้าย-ม-1024x773.jpg';
       case 'ศูนย์พระนครเหนือ':
-        return 'src/image/IMG_6489-2.jpg';
+        return 'src/image/maxresdefault.jpg';
       case 'ศูนย์โชติเวช':
-        return 'src/image/IMG_6489-2.jpg';
+        return 'src/image/MG_2201-1-copy.jpg';
       default:
         return 'src/image/IMG_6489-2.jpg';
     }
@@ -56,7 +56,7 @@ const SelectCenterPage = () => {
         <h1 className="my-4">เลือกศูนย์ที่จะจอง</h1>
         {centers.map((center, index) => (
           <div className="col-md-3 mb-4" key={index}>
-            <div className="card" onClick={() => handleCenterClick(center)}>
+            <div className="card" style={{ cursor: 'pointer' }}  onClick={() => handleCenterClick(center)}>
               <img 
                 style={{ height: '25vh' }}
                 src={getImageForCenter(center)}
