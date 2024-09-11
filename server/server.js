@@ -339,27 +339,51 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     return res.status(400).send('Missing required fields');
   }
 
-  const query = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-  const status = 'wait';
+  // Check for overlapping bookings
+  const checkOverlapQuery = `
+    SELECT * FROM orderbooking
+    WHERE RoomID = ? AND Date = ? AND (
+      (Start < ? AND End > ?) OR
+      (Start < ? AND End > ?) OR
+      (Start = ? AND End = ?)
+    )
+  `;
 
-  connection.query(query, [RoomID, Date, Start, End, status, Name, Phone, Reason], (error, results) => {
+  connection.query(checkOverlapQuery, [RoomID, Date, End, End, Start, Start, Start, End], (error, results) => {
     if (error) {
-      console.error('Error inserting booking:', error);
-      return res.status(500).json({ error: 'Error creating booking', details: error });
+      console.error('Error checking for overlapping bookings:', error);
+      return res.status(500).json({ error: 'Error checking for overlapping bookings', details: error });
     }
 
-    const orderBookingID = results.insertId;
+    if (results.length > 0) {
+      return res.status(400).send('ไม่สามารถจองได้เนื่องจากได้มีการจองในเวลานี้อยู่แล้ว');
+    }
 
-    const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
-    connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
+    // Proceed with booking creation
+    const query = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    const status = 'wait';
+
+    connection.query(query, [RoomID, Date, Start, End, status, Name, Phone, Reason], (error, results) => {
       if (error) {
-        console.error('Error inserting into userlistorder:', error);
-        return res.status(500).json({ error: 'Error linking user to booking', details: error });
+        console.error('Error inserting booking:', error);
+        return res.status(500).json({ error: 'Error creating booking', details: error });
       }
-      res.status(201).send('Booking created and linked to user successfully');
+
+      const orderBookingID = results.insertId;
+
+      const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
+      connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
+        if (error) {
+          console.error('Error inserting into userlistorder:', error);
+          return res.status(500).json({ error: 'Error linking user to booking', details: error });
+        }
+        res.status(201).send('การจองสำเร็จ');
+      });
     });
   });
 });
+
+
 
 
 app.listen(PORT, () => {
