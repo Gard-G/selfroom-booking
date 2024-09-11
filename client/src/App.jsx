@@ -9,6 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const localizer = momentLocalizer(moment); // Initialize moment localizer for calendar
 
+
 // Custom toolbar component for the calendar
 function CustomToolbar(props) {
   const goToView = (view) => {
@@ -121,14 +122,19 @@ function App() {
 
   // Function to handle clicking on an event (shows alert with booking details)
   const handleSelectEvent = (event) => {
+
+    const startDate = moment(event.start).format('DD-MM-YYYY');
+    const startTime = moment(event.start).format('HH:mm');
+    const endTime = moment(event.end).format('HH:mm');
+
     alert(`
-      Booking Details:
-      Room: ${event.RoomName}
-      Name: ${event.Name}
-      Phone: ${event.Phone}
-      Reason: ${event.Reason}
-      Date: ${new Date(event.start).toLocaleDateString()}
-      Time: ${new Date(event.start).toLocaleTimeString()} - ${new Date(event.end).toLocaleTimeString()}
+      รายละเอียกการจอง:
+      ชื่อห้อง: ${event.RoomName}
+      ชื่อ-นามสกุล: ${event.Name}
+      เบอร์โทร: ${event.Phone}
+      ใช้ทำอะไร: ${event.Reason}
+      วันที่: ${startDate}
+      เวลา: ${startTime} - ${endTime}
     `);
   };
 

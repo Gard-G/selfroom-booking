@@ -79,7 +79,7 @@ const BookingPage = () => {
       <h1 className="mt-4 mb-4">จองห้อง {room ? room.RoomName : ''}</h1>
       <form onSubmit={handleSubmit}>
         <div className='form-group mb-3'>
-          <label htmlFor="date">Date:</label>
+          <label htmlFor="date">วันที่:</label>
           <input
             id="date"
             type="date"
@@ -91,7 +91,7 @@ const BookingPage = () => {
 
         <div className='row'>
           <div className="form-group mb-3 col-lg-6 col-12">
-            <label htmlFor="startTime">Start Time:</label>
+            <label htmlFor="startTime">เวลาเริ่ม:</label>
             <input
               id="startTime"
               type="time"
@@ -101,7 +101,7 @@ const BookingPage = () => {
             />
           </div>
           <div className="form-group mb-3 col-lg-6 col-12">
-            <label htmlFor="endTime">End Time:</label>
+            <label htmlFor="endTime">จนถึง:</label>
             <input
               id="endTime"
               type="time"
@@ -113,7 +113,7 @@ const BookingPage = () => {
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="name">Name:</label>
+          <label htmlFor="name">ชื่อ-นามสกุล:</label>
           <input
             id="name"
             type="text"
@@ -124,7 +124,7 @@ const BookingPage = () => {
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="phone">Phone:</label>
+          <label htmlFor="phone">เบอร์โทร:</label>
           <input
             id="phone"
             type="text"
@@ -135,7 +135,7 @@ const BookingPage = () => {
         </div>
 
         <div className="form-group mb-4">
-          <label htmlFor="reason">Reason:</label>
+          <label htmlFor="reason">ใช้ทำอะไร:</label>
           <textarea
             id="reason"
             className="form-control"

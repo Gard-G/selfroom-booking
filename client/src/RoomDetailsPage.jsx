@@ -10,7 +10,7 @@ const RoomDetailsPage = () => {
   const [expandedRoomIDs, setExpandedRoomIDs] = useState(new Set()); // Track expanded room IDs
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const queryParams = new URLSearchParams(location.search);
   const selectedCenter = queryParams.get('center');
 
@@ -50,63 +50,67 @@ const RoomDetailsPage = () => {
   return (
     <div className="container mt-5">
       <Navbar />
-      <div style={{width:'65vw'}}>
-      <h1 className="mb-4">Available Rooms at {selectedCenter}</h1>
-      <div className="row">
-        {rooms.map(room => (
-          <div className="col-md-6 mb-4" key={room.RoomID}>
-            <div className="card">
-              <div className="card-body">
-                <h3 className="card-title">{room.RoomName}</h3>
-                <h6 className="card-text">รายละเอียดห้อง:</h6>
-                <h6 className="card-text mb-4">{room.DetailRoom}</h6>
-                
-                {/* Toggle button for booking details */}
-                {room.bookings && room.bookings.length > 0 ? (
-                  <div>
-                    <button 
-                      className="btn btn-secondary mb-3"
-                      onClick={() => toggleBookingDetails(room.RoomID)}
-                    >
-                      {expandedRoomIDs.has(room.RoomID) ? 'วันเวลาที่มีคนกำลังจอง:' : 'วันเวลาที่มีคนกำลังจอง:'}
-                    </button>
-                    
-                    {expandedRoomIDs.has(room.RoomID) && (
-                      <div>
-                        <ul className="list-unstyled">
-                          {room.bookings.map((booking, index) => (
-                            <li key={index} className="mb-2">
-                              <span className="d-block">
-                                <strong>วันที่:</strong> {new Date(booking.Start).toLocaleDateString()}
-                              </span>
-                              <span className="d-block">
-                                <strong>เวลาเริ่ม:</strong> {new Date(booking.Start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-                              </span>
-                              <span className="d-block">
-                                <strong>จนถึง:</strong> {new Date(booking.End).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <h6>ยังไม่มีการจองสำหรับห้องนี้</h6>
-                )}
+      <div style={{ width: '65vw' }}>
+        <h1 className="mb-4">Available Rooms at {selectedCenter}</h1>
+        <div className="row">
+          {rooms.map(room => (
+            <div className="col-md-6 mb-4" key={room.RoomID}>
+              <div className="card">
+                <div className="card-body">
+                  <h3 className="card-title">{room.RoomName}</h3>
+                  <h6 className="card-text">รายละเอียดห้อง:</h6>
+                  <h6 className="card-text mb-4">{room.DetailRoom}</h6>
 
-                <button 
-                  className="btn btn-primary mt-3"
-                  onClick={() => handleRoomSelect(room.RoomID)}
-                >
-                  เลือกห้อง
-                </button>
+                  {/* Toggle button for booking details */}
+                  {room.bookings && room.bookings.length > 0 ? (
+                    <div>
+                      <button
+                        className="btn btn-secondary mb-3"
+                        onClick={() => toggleBookingDetails(room.RoomID)}
+                      >
+                        {expandedRoomIDs.has(room.RoomID) ? 'วันเวลาที่มีคนกำลังจอง:' : 'วันเวลาที่มีคนกำลังจอง:'}
+                      </button>
+
+                      {expandedRoomIDs.has(room.RoomID) && (
+                        <div>
+                          <ul className="list-unstyled">
+                            {room.bookings.map((booking, index) => (
+                              <li key={index} className="mb-2">
+                                <span className="d-block">
+                                  <strong>วันที่:</strong> {new Date(booking.Start).toLocaleDateString('th-TH', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                                <span className="d-block">
+                                  <strong>เวลาเริ่ม:</strong> {new Date(booking.Start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                </span>
+                                <span className="d-block">
+                                  <strong>จนถึง:</strong> {new Date(booking.End).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <h6>ยังไม่มีการจองสำหรับห้องนี้</h6>
+                  )}
+
+                  <button
+                    className="btn btn-primary mt-3"
+                    onClick={() => handleRoomSelect(room.RoomID)}
+                  >
+                    เลือกห้อง
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   );
 };
