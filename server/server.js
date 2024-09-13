@@ -234,6 +234,8 @@ app.get('/api/room-centers', (req, res) => {
   res.json(roomCenters);
 });
 
+
+//fetch rooms with their bookings
 app.get('/api/rooms-with-bookings', (req, res) => {
   const selectedCenter = req.query.center;
   const currentDate = new Date().toISOString().slice(0, 10);  // Get current date in 'YYYY-MM-DD' format
@@ -245,6 +247,7 @@ app.get('/api/rooms-with-bookings', (req, res) => {
     FROM listroom lr
     LEFT JOIN orderbooking ob ON lr.RoomID = ob.RoomID 
     AND (ob.Date > ? OR (ob.Date = ? AND ob.End >= ?))
+    AND ob.Status != 'reject'
     WHERE lr.RoomCenter = ?
     ORDER BY lr.RoomID, ob.Start
   `;
@@ -342,7 +345,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
   // Check for overlapping bookings
   const checkOverlapQuery = `
     SELECT * FROM orderbooking
-    WHERE RoomID = ? AND Date = ? AND (
+    WHERE RoomID = ? AND Date = ? AND Status != 'reject' AND (
       (Start < ? AND End > ?) OR
       (Start < ? AND End > ?) OR
       (Start = ? AND End = ?)

@@ -76,6 +76,7 @@ const BookingPage = () => {
       <div className='card bg-dark text-white'>
         <h1 className="mt-4 mb-4">จองห้อง {room ? room.RoomName : ''}</h1>
         <form onSubmit={handleSubmit}>
+
           <div className='form-group mb-3'>
             <label htmlFor="date">วันที่:</label>
             <input
@@ -85,6 +86,7 @@ const BookingPage = () => {
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
+            <small>จองวันที่: {date ? `${date.split('-')[2]} เดือน${date.split('-')[1]} ปี${date.split('-')[0]}` : ''}</small>
           </div>
 
           <div className='row'>
