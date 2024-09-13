@@ -5,7 +5,8 @@ const bcrypt = require('bcrypt');
 const ldap = require('ldapjs');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,6 +15,7 @@ const SECRET_KEY = 'your_jwt_secret'; // Ensure consistency
 
 app.use(cors());
 app.use(express.json());
+app.use('/images', express.static('public/images'));
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -243,14 +245,14 @@ app.get('/api/rooms-with-bookings', (req, res) => {
 
   // Query to fetch rooms with their bookings
   const query = `
-    SELECT lr.RoomID, lr.RoomName, lr.DetailRoom, ob.OrderBooking, ob.Date, ob.Start, ob.End, ob.Status
-    FROM listroom lr
-    LEFT JOIN orderbooking ob ON lr.RoomID = ob.RoomID 
-    AND (ob.Date > ? OR (ob.Date = ? AND ob.End >= ?))
-    AND ob.Status != 'reject'
-    WHERE lr.RoomCenter = ?
-    ORDER BY lr.RoomID, ob.Start
-  `;
+  SELECT lr.RoomID, lr.RoomName, lr.DetailRoom, lr.Image, ob.OrderBooking, ob.Date, ob.Start, ob.End, ob.Status
+  FROM listroom lr
+  LEFT JOIN orderbooking ob ON lr.RoomID = ob.RoomID 
+  AND (ob.Date > ? OR (ob.Date = ? AND ob.End >= ?))
+  AND ob.Status != 'reject'
+  WHERE lr.RoomCenter = ?
+  ORDER BY lr.RoomID, ob.Start
+`;
 
   connection.query(query, [currentDate, currentDate, currentTime, selectedCenter], (error, results) => {
     if (error) {
@@ -269,6 +271,7 @@ app.get('/api/rooms-with-bookings', (req, res) => {
           RoomName: row.RoomName,
           DetailRoom: row.DetailRoom,
           bookings: [],
+          Image: row.Image,  // Add image field here
         };
         rooms.push(roomMap[row.RoomID]);
       }
@@ -316,21 +319,34 @@ app.get('/api/rooms/:id', (req, res) => {
 
 
 // Route to add a new room
-app.post('/api/add-room', authenticateToken, (req, res) => {
+// Set up storage and file filter for multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images/'); // Save uploaded images in 'public/images' directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
+  },
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/api/add-room', upload.single('Image'), (req, res) => {
   const { RoomName, RoomCenter, DetailRoom } = req.body;
+  const image = req.file ? req.file.filename : null; // Get image filename
 
-  if (!RoomName || !RoomCenter || !DetailRoom) {
-    return res.status(400).send('Missing required fields');
+  // Insert room details and image filename into database
+  const query = 'INSERT INTO listroom (RoomName, RoomCenter, DetailRoom, Image) VALUES (?, ?, ?, ?)';
+const values = [RoomName, RoomCenter, DetailRoom, image];
+
+connection.query(query, values, (err, results) => {
+  if (err) {
+    console.error('Error inserting room:', err);
+    res.status(500).json({ error: 'Failed to add room.' });
+  } else {
+    res.status(200).json({ message: 'Room added successfully!' });
   }
-
-  const query = 'INSERT INTO listroom (RoomName, RoomCenter, DetailRoom) VALUES (?, ?, ?)';
-  connection.query(query, [RoomName, RoomCenter, DetailRoom], (error) => {
-    if (error) {
-      res.status(500).send('Error adding room to database');
-      return;
-    }
-    res.status(201).send('Room added successfully');
-  });
+});
 });
 
 // Route to create a new booking

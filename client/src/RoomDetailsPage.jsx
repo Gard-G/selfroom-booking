@@ -27,6 +27,7 @@ const RoomDetailsPage = () => {
       });
   }, [selectedCenter]);
 
+  console.log(rooms); // ตรวจสอบค่า `rooms` และ `room.Image`
   const handleRoomSelect = (roomID) => {
     navigate(`/booking?center=${selectedCenter}&room=${roomID}`);
   };
@@ -56,8 +57,18 @@ const RoomDetailsPage = () => {
           {rooms.map(room => (
             <div className="col-md-6 mb-4" key={room.RoomID}>
               <div className="card">
+                
                 <div className="card-body">
                   <h3 className="card-title">{room.RoomName}</h3>
+                  {/* Show room image */}
+                {room.Image && (
+                  <img
+                    src={`http://localhost:5000/images/${room.Image}`} // Correctly use the image URL
+                    alt={room.RoomName}
+                    className="img-fluid mb-3"
+                    style={{ width: '230px', maxHeight: '200px', objectFit: 'cover' }}
+                  />
+                )}
                   <h6 className="card-text">รายละเอียดห้อง:</h6>
                   <h6 className="card-text mb-4">{room.DetailRoom}</h6>
 

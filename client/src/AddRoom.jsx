@@ -7,7 +7,8 @@ import Navbar from './components/nevbar';
 const AddRoomPage = () => {
   const [roomName, setRoomName] = useState('');
   const [roomCenter, setRoomCenter] = useState('');
-  const [detailRoom, setDetailRoom] = useState(''); // New state for DetailRoom
+  const [detailRoom, setDetailRoom] = useState('');
+  const [image, setImage] = useState(null); // New state for image
   const [centers, setCenters] = useState([]);
   const navigate = useNavigate();
 
@@ -40,23 +41,35 @@ const AddRoomPage = () => {
     fetchCenters();
   }, [navigate]);
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]); // Set selected image
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append('RoomName', roomName);
+      formData.append('RoomCenter', roomCenter);
+      formData.append('DetailRoom', detailRoom);
+      formData.append('Image', image); // Append image to form data
+
       const token = localStorage.getItem('token');
       await axios.post(
         'http://localhost:5000/api/add-room',
-        { RoomName: roomName, RoomCenter: roomCenter, DetailRoom: detailRoom }, // Include DetailRoom
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data', // Set content type for file upload
           },
         }
       );
       alert('Room added successfully!');
       setRoomName('');
       setRoomCenter('');
-      setDetailRoom(''); // Clear DetailRoom field
+      setDetailRoom('');
+      setImage(null); // Clear image field
     } catch (error) {
       console.error('Error adding room:', error);
       alert('Failed to add room.');
@@ -65,12 +78,12 @@ const AddRoomPage = () => {
 
   return (
     <div className="container mt-5">
-        <Navbar />
+      <Navbar />
       <div className="card p-5 my-5 bg-dark text-white rounded">
         <div className="card-header">
           <h2>เพิ่มห้อง</h2>
         </div>
-        <div className="card-body ">
+        <div className="card-body">
           <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
               <label htmlFor="roomName">ชื่อห้อง:</label>
@@ -106,6 +119,15 @@ const AddRoomPage = () => {
                 value={detailRoom}
                 onChange={(e) => setDetailRoom(e.target.value)}
                 rows="3"
+              />
+            </div>
+            <div className="form-group mb-3">
+              <label htmlFor="image">รูปภาพห้อง:</label>
+              <input
+                id="image"
+                type="file"
+                className="form-control"
+                onChange={handleImageChange}
               />
             </div>
             <button type="submit" className="btn btn-outline-success btn-block">Add Room</button>
