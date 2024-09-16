@@ -64,13 +64,13 @@ const StatusOrderPage = () => {
   return (
     <div>
       <Navbar />
-      <div className="container mt-4">
+      <div className="container mt-5">
         <h1>รายการจองของคุณ</h1>
         {error && <div className="alert alert-danger">{error}</div>}
         {orders.length === 0 ? (
           <p>No orders found.</p>
         ) : (
-          <table className="table table-striped table-bordered">
+          <table className="table table-striped table-bordered mt-4">
             <thead className="table-dark">
               <tr style={{fontSize: '20px'}}>
                 <th>ชื่อห้อง</th>
