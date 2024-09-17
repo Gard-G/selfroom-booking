@@ -9,12 +9,27 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const localizer = momentLocalizer(moment); // Initialize moment localizer for calendar
 
+// ฟังก์ชันแปลงปี ค.ศ. เป็น พ.ศ.
+const formatDateInThai = (date) => {
+  const thaiDate = new Intl.DateTimeFormat('th-TH', {
+    year: 'numeric',
+    month: 'long',
+  }).format(date);
+
+  // เปลี่ยนปี ค.ศ. เป็น พ.ศ. โดยบวก 543
+  const [month, year] = thaiDate.split(' ');
+  const thaiYear = parseInt(year) ;
+  return `${month} ${thaiYear}`;
+};
+
 
 // Custom toolbar component for the calendar
 function CustomToolbar(props) {
   const goToView = (view) => {
     props.onView(view); // Switch calendar view (Month, Day, Agenda)
   };
+
+  const thaiYearLabel = formatDateInThai(props.date);
 
   return (
     <div className=''>
@@ -45,7 +60,7 @@ function CustomToolbar(props) {
       </span>
 
       {/* Calendar Label (e.g., Month/Year) */}
-      <span className="rbc-toolbar-label"><h3>{props.label}</h3></span>
+      <span className="rbc-toolbar-label"><h3>{thaiYearLabel}</h3></span>
 
       <span className="rbc-btn-group">
         {/* View Buttons */}
@@ -123,7 +138,11 @@ function App() {
   // Function to handle clicking on an event (shows alert with booking details)
   const handleSelectEvent = (event) => {
 
-    const startDate = moment(event.start).format('DD-MM-YYYY');
+    const startDate = new Intl.DateTimeFormat('th-TH', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(event.start));
     const startTime = moment(event.start).format('HH:mm');
     const endTime = moment(event.end).format('HH:mm');
 
