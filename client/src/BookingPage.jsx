@@ -73,7 +73,7 @@ const BookingPage = () => {
     <div className="container">
       <Navbar />
       <div className='mb-5'></div>
-      <div className='card bg-dark text-white'>
+      <div className='card card-container bg-dark text-white'>
         <h1 className="mt-4 mb-4">จองห้อง {room ? room.RoomName : ''}</h1>
         <form onSubmit={handleSubmit}>
 
@@ -146,7 +146,7 @@ const BookingPage = () => {
           </div>
 
           <button type="submit" className="btn btn-success btn-block">
-            Book Room
+            จองห้อง
           </button>
         </form>
 
