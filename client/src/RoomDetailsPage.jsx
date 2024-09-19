@@ -52,7 +52,7 @@ const RoomDetailsPage = () => {
     <div className="container mt-5">
       <Navbar />
       <div style={{ width: '65vw' }}>
-        <h1 className="mb-4">Available Rooms at {selectedCenter}</h1>
+        <h1 className="mb-4">ห้องของ {selectedCenter}</h1>
         <div className="row">
           {rooms.map(room => (
             <div className="col-md-6 mb-4" key={room.RoomID}>
@@ -69,8 +69,8 @@ const RoomDetailsPage = () => {
                     style={{ width: '230px', maxHeight: '200px', objectFit: 'cover' }}
                   />
                 )}
-                  <h6 className="card-text">รายละเอียดห้อง:</h6>
-                  <h6 className="card-text mb-4">{room.DetailRoom}</h6>
+                  <h5 className="card-text">รายละเอียดห้อง:</h5>
+                  <h5 className="card-text mb-4">{room.DetailRoom}</h5>
 
                   {/* Toggle button for booking details */}
                   {room.bookings && room.bookings.length > 0 ? (
