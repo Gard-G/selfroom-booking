@@ -213,7 +213,7 @@ function App() {
               style={{background:'#95a5a6', fontSize:'13px', color:'black', cursor: 'pointer'}}
               onClick={() => setSelectedCenter(null)} // Reset filter when clicking "All Centers"
             >
-              All Centers
+              ศูนย์ทั้งหมด
             </span>
           </div>
         </div>

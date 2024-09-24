@@ -66,7 +66,7 @@ function Navbar() {
                   {username}
                 </a>
                 <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li><a className="dropdown-item" href="#" onClick={handleLogout}>Log Out</a></li>
+                  <li><a className="dropdown-item" href="#" onClick={handleLogout}>ออกจากระบบ</a></li>
                 </ul>
               </li>
             ) : (
