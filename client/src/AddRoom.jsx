@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './components/nevbar';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddRoomPage = () => {
   const [roomName, setRoomName] = useState('');
@@ -19,7 +21,7 @@ const AddRoomPage = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (response.data.IDstatus !== 'admin') {
-          alert('Access denied: Admins only');
+          toast.error('Access denied: Admins only'); // Use Toastify for error message
           navigate('/'); // Redirect to home or login
         }
       } catch (error) {
@@ -65,20 +67,21 @@ const AddRoomPage = () => {
           },
         }
       );
-      alert('Room added successfully!');
+      toast.success('Room added successfully!'); // Use Toastify for success message
       setRoomName('');
       setRoomCenter('');
       setDetailRoom('');
       setImage(null); // Clear image field
     } catch (error) {
       console.error('Error adding room:', error);
-      alert('Failed to add room.');
+      toast.error('Failed to add room.'); // Use Toastify for error message
     }
   };
 
   return (
     <div className="container mt-5">
       <Navbar />
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick={true} rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <div className="card p-5 my-5 bg-dark text-white rounded">
         <div className="card-header">
           <h2>เพิ่มห้อง</h2>

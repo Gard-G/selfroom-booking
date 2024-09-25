@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/nevbar';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 
 const BookingPage = () => {
   const [room, setRoom] = useState(null);
@@ -12,8 +13,6 @@ const BookingPage = () => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [reason, setReason] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalContent, setModalContent] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -34,7 +33,7 @@ const BookingPage = () => {
     event.preventDefault();
 
     if (!date || !startTime || !endTime || !name || !phone || !reason) {
-      handleShowModal('Please fill in all fields.');
+      toast.error('Please fill in all fields.');
       return;
     }
 
@@ -56,17 +55,11 @@ const BookingPage = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      handleShowModal(response.data);
+      toast.success(response.data);
     } catch (error) {
       console.error('Error creating booking:', error.response ? error.response.data : error.message);
-      handleShowModal(error.response?.data || 'Failed to create booking.');
+      toast.error(error.response?.data || 'Failed to create booking.');
     }
-  };
-
-  const handleCloseModal = () => setShowModal(false);
-  const handleShowModal = (message) => {
-    setModalContent(message);
-    setShowModal(true);
   };
 
   return (
@@ -150,24 +143,7 @@ const BookingPage = () => {
           </button>
         </form>
 
-        {showModal && (
-          <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
-            <div className="modal-dialog" role="document">
-              <div className="modal-content bg-success text-white">
-                <div className="modal-header">
-                  <h5 className="modal-title">Notification</h5>
-                  <button type="button" className="btn-close" onClick={handleCloseModal}></button>
-                </div>
-                <div className="modal-body">
-                  {modalContent}
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-light" onClick={handleCloseModal}>Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       </div>
     </div>
   );

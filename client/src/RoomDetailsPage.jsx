@@ -66,7 +66,7 @@ const RoomDetailsPage = () => {
                     src={`http://localhost:5000/images/${room.Image}`} // Correctly use the image URL
                     alt={room.RoomName}
                     className="img-fluid mb-3"
-                    style={{ width: '230px', maxHeight: '200px', objectFit: 'cover' }}
+                    style={{ width: '230px', height: '160px', objectFit: 'cover' }}
                   />
                 )}
                   <h5 className="card-text">รายละเอียดห้อง:</h5>

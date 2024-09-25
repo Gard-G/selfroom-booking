@@ -402,7 +402,43 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
   });
 });
 
+// ดึงรายชื่อ admin
+app.get('/api/admins', authenticateToken, (req, res) => {
+  const query = 'SELECT Username FROM adminlist';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching admins:', err);
+      return res.status(500).send(err);
+    }
+    res.json(results);
+  });
+});
 
+// เพิ่ม admin
+app.post('/api/admins', authenticateToken, (req, res) => {
+  const { username } = req.body;
+  const query = 'INSERT INTO adminlist (Username) VALUES (?)';
+  connection.query(query, [username], (err, result) => {
+    if (err) {
+      console.error('Error adding admin:', err);
+      return res.status(500).send(err);
+    }
+    res.status(200).send('Admin added successfully');
+  });
+});
+
+// ลบ admin
+app.delete('/api/admins/:username', authenticateToken, (req, res) => {
+  const { username } = req.params;
+  const query = 'DELETE FROM adminlist WHERE Username = ?';
+  connection.query(query, [username], (err, result) => {
+    if (err) {
+      console.error('Error deleting admin:', err);
+      return res.status(500).send(err);
+    }
+    res.status(200).send('Admin deleted successfully');
+  });
+});
 
 
 app.listen(PORT, () => {

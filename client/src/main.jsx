@@ -15,6 +15,7 @@ import UserManagement from './UManage';
 import SelectCenterPage from './SelectCenterPage';
 import Testapp from './test';
 import RoomDetailsPage from './RoomDetailsPage';
+import AdminManagementPage from './AdminManagementPage';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 
@@ -31,6 +32,7 @@ root.render(
         <Route path="/select-rooms" element={<RoomDetailsPage />} />
         <Route path="/SelectCenter" element={<SelectCenterPage />} />
         <Route path="/testapp" element={<Testapp />} />
+        <Route path="/Admin-manage" element={<AdminManagementPage />} />
       </Routes>
     </Router>
   </React.StrictMode>
