@@ -39,11 +39,11 @@ const SelectCenterPage = () => {
       case 'ศูนย์เทเวศร์':
         return 'src/image/IMG_6489-2.jpg';
       case 'ศูนย์พณิชยการพระนคร':
-        return 'src/image/ป้าย-ม-1024x773.jpg';
+        return 'src/image/bus_buiding2.jpg';
       case 'ศูนย์พระนครเหนือ':
-        return 'src/image/maxresdefault.jpg';
+        return 'src/image/bb1.jpg';
       case 'ศูนย์โชติเวช':
-        return 'src/image/MG_2201-1-copy.jpg';
+        return 'src/image/Screenshot 2024-09-27 113057.png';
       default:
         return 'src/image/IMG_6489-2.jpg';
     }

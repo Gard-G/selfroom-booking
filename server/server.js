@@ -344,10 +344,86 @@ connection.query(query, values, (err, results) => {
     console.error('Error inserting room:', err);
     res.status(500).json({ error: 'Failed to add room.' });
   } else {
-    res.status(200).json({ message: 'Room added successfully!' });
+    // Fetch the newly added room from the database
+    const newRoom = {
+      RoomID: results.insertId, // Get the ID of the newly added room
+      RoomName,
+      RoomCenter,
+      DetailRoom,
+      Image: image
+    };
+    res.status(200).json(newRoom); // Return the new room data
   }
 });
 });
+
+
+// Get all rooms
+app.get('/api/rooms-all', (req, res) => {
+  const query = 'SELECT * FROM listroom';
+  connection.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+// API endpoint for editing rooms
+app.put('/api/edit-room/:id', upload.single('Image'), (req, res) => {
+  const { RoomName, DetailRoom, RoomCenter } = req.body;
+  const { id } = req.params;
+  const image = req.file ? req.file.filename : null;
+
+  let query = 'UPDATE listroom SET RoomName = ?, DetailRoom = ?, RoomCenter = ?';
+  const values = [RoomName, DetailRoom, RoomCenter];
+
+  // If an image was uploaded, include it in the update
+  if (image) {
+    query += ', Image = ?';
+    values.push(image);
+  }
+
+  query += ' WHERE RoomID = ?';
+  values.push(id);
+
+  connection.query(query, values, (error, results) => {
+    if (error) {
+      console.error('Error updating room:', error);
+      return res.status(500).send('Error updating room');
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).send('Room not found');
+    }
+
+    res.status(200).send('Room updated successfully');
+  });
+});
+
+
+
+// API endpoint for deleting a room
+app.delete('/api/delete-room/:id', (req, res) => {
+  const { id } = req.params;
+  
+  const deleteRoomQuery = 'DELETE FROM listroom WHERE RoomID = ?';
+  connection.query(deleteRoomQuery, [id], (error, results) => {
+    if (error) {
+      console.error('Error deleting room:', error);
+      return res.status(500).json({ message: 'Failed to delete room. Please try again later.' });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    res.status(200).json({ message: 'Room deleted successfully' });
+  });
+});
+
+
+
 
 // Route to create a new booking
 app.post('/api/bookings', authenticateToken, (req, res) => {
