@@ -32,9 +32,9 @@ function CustomToolbar(props) {
   const thaiYearLabel = formatDateInThai(props.date);
 
   return (
-    <div className=''>
+    <div className='container'>
     <div className="rbc-toolbar">
-      <span className="rbc-btn-group">
+      <span className=" rbc-btn-group mb-2">
         {/* Custom Previous Button */}
         <button 
           type="button" 
@@ -43,21 +43,20 @@ function CustomToolbar(props) {
         >
           {"<"}
         </button>
-      </span>
 
-      <span className="rbc-btn-group">
-        {/* Custom Next Button */}
-        <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => props.onNavigate('NEXT')}>
+         {/* Custom Next Button */}
+         <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => props.onNavigate('NEXT')}>
           {">"}
         </button>
-      </span>
 
-      <span className="rbc-btn-group">
+
         {/* Custom Today Button */}
         <button type="button" style={{ backgroundColor: '#007bff', color: '#fff' }} onClick={() => props.onNavigate('TODAY')}>
           วันนี้
         </button>
       </span>
+
+      
 
       {/* Calendar Label (e.g., Month/Year) */}
       <span className="rbc-toolbar-label"><h3>{thaiYearLabel}</h3></span>
@@ -173,41 +172,37 @@ function App() {
         <div className="row justify-content-end mb-3 mt-3">
           <div className="col-auto">
             <span 
-              className='badge' 
-              style={{background:'#3498db', fontSize:'13px', color:'black', cursor: 'pointer'}}
+              className='badge ' 
+              style={{background:'#3498db', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์เทเวศร์')} // Set selected center to 'ศูนย์เทเวศร์'
             >
-              ศูนย์เทเวศร์
+              เทเวศร์
             </span>
-          </div>
-          <div className="col-auto">
+
             <span 
               className='badge' 
-              style={{background:'#2ecc71', fontSize:'13px', color:'black', cursor: 'pointer'}}
+              style={{background:'#2ecc71', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์พณิชยการพระนคร')} // Set selected center to 'ศูนย์พณิชยการพระนคร'
             >
-              ศูนย์พณิชยการพระนคร
+              พณิช
             </span>
-          </div>
-          <div className="col-auto">
+
             <span 
               className='badge' 
-              style={{background:'#e74c3c', fontSize:'13px', color:'black', cursor: 'pointer'}}
+              style={{background:'#e74c3c', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์พระนครเหนือ')} // Set selected center to 'ศูนย์พระนครเหนือ'
             >
-              ศูนย์พระนครเหนือ
+              พระนครเหนือ
             </span>
-          </div>
-          <div className="col-auto">
+
             <span 
               className='badge' 
-              style={{background:'#f1c40f', fontSize:'13px', color:'black', cursor: 'pointer'}}
+              style={{background:'#f1c40f', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์โชติเวช')} // Set selected center to 'ศูนย์โชติเวช'
             >
-              ศูนย์โชติเวช
+              โชติเวช
             </span>
-          </div>
-          <div className="col-auto">
+
             <span 
               className='badge' 
               style={{background:'#95a5a6', fontSize:'13px', color:'black', cursor: 'pointer'}}
@@ -215,7 +210,7 @@ function App() {
             >
               ศูนย์ทั้งหมด
             </span>
-          </div>
+          </div>   
         </div>
         
         <div className="row">
