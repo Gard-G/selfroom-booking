@@ -6,6 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './App.css';
 import Navbar from './components/nevbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Modal, Button } from 'react-bootstrap'; // นำเข้า Modal และ Button
 
 const localizer = momentLocalizer(moment); // Initialize moment localizer for calendar
 
@@ -75,6 +76,8 @@ function CustomToolbar(props) {
 function App() {
   const [events, setEvents] = useState([]); // State to store events from the API
   const [selectedCenter, setSelectedCenter] = useState(null); // State to track the selected center for filtering
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [selectedEvent, setSelectedEvent] = useState(null); // State to store the selected event
 
   // Fetch events from the backend API on component mount
   useEffect(() => {
@@ -136,25 +139,12 @@ function App() {
 
   // Function to handle clicking on an event (shows alert with booking details)
   const handleSelectEvent = (event) => {
-
-    const startDate = new Intl.DateTimeFormat('th-TH', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(new Date(event.start));
-    const startTime = moment(event.start).format('HH:mm');
-    const endTime = moment(event.end).format('HH:mm');
-
-    alert(`
-      รายละเอียกการจอง:
-      ชื่อห้อง: ${event.RoomName}
-      ชื่อ-นามสกุล: ${event.Name}
-      เบอร์โทร: ${event.Phone}
-      ใช้ทำอะไร: ${event.Reason}
-      วันที่: ${startDate}
-      เวลา: ${startTime} - ${endTime}
-    `);
+    setSelectedEvent(event); // Set the selected event
+    setShowModal(true); // Show the modal
   };
+
+    // Function to handle modal close
+    const handleCloseModal = () => setShowModal(false);
 
   // Filter events based on the selected center
   const filteredEvents = selectedCenter 
@@ -173,7 +163,7 @@ function App() {
           <div className="col-auto">
             <span 
               className='badge ' 
-              style={{background:'#3498db', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
+              style={{background:'#3498db', fontSize:'14.5px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์เทเวศร์')} // Set selected center to 'ศูนย์เทเวศร์'
             >
               เทเวศร์
@@ -181,7 +171,7 @@ function App() {
 
             <span 
               className='badge' 
-              style={{background:'#2ecc71', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
+              style={{background:'#2ecc71', fontSize:'14.5px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์พณิชยการพระนคร')} // Set selected center to 'ศูนย์พณิชยการพระนคร'
             >
               พณิช
@@ -189,7 +179,7 @@ function App() {
 
             <span 
               className='badge' 
-              style={{background:'#e74c3c', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
+              style={{background:'#e74c3c', fontSize:'14.5px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์พระนครเหนือ')} // Set selected center to 'ศูนย์พระนครเหนือ'
             >
               พระนครเหนือ
@@ -197,7 +187,7 @@ function App() {
 
             <span 
               className='badge' 
-              style={{background:'#f1c40f', fontSize:'13px', color:'black', cursor: 'pointer', marginRight: '7px'}}
+              style={{background:'#f1c40f', fontSize:'14.5px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์โชติเวช')} // Set selected center to 'ศูนย์โชติเวช'
             >
               โชติเวช
@@ -205,7 +195,7 @@ function App() {
 
             <span 
               className='badge' 
-              style={{background:'#95a5a6', fontSize:'13px', color:'black', cursor: 'pointer'}}
+              style={{background:'#95a5a6', fontSize:'14.5px', color:'black', cursor: 'pointer'}}
               onClick={() => setSelectedCenter(null)} // Reset filter when clicking "All Centers"
             >
               ศูนย์ทั้งหมด
@@ -213,7 +203,8 @@ function App() {
           </div>   
         </div>
         
-        <div className="row">
+         {/* Calendar component */}
+         <div className="row">
           <div className="col-12">
             <Calendar className='calenda-size'
               localizer={localizer}
@@ -221,7 +212,6 @@ function App() {
               startAccessor="start"
               endAccessor="end"
               titleAccessor="title"
-              
               eventPropGetter={eventStyleGetter} // Apply custom styles to events
               components={{
                 toolbar: CustomToolbar // Use the custom toolbar component
@@ -230,6 +220,35 @@ function App() {
             />
           </div>
         </div>
+
+        {/* Modal for event details */}
+<Modal show={showModal} onHide={handleCloseModal} centered>
+  <Modal.Header closeButton>
+    <Modal.Title>รายละเอียดการจอง</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {selectedEvent && (
+      <div>
+        <div className="mb-3">
+          <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+            <p><strong>ชื่อห้อง:</strong> {selectedEvent.RoomName}</p>
+            <p><strong>ชื่อ-นามสกุล:</strong> {selectedEvent.Name}</p>
+            <p><strong>เบอร์โทร:</strong> {selectedEvent.Phone}</p>
+            <p><strong>ใช้ทำอะไร:</strong> {selectedEvent.Reason}</p>
+            <p><strong>วันที่:</strong> {moment(selectedEvent.start).format('DD/MM/YYYY')}</p>
+            <p><strong>เวลา:</strong> {moment(selectedEvent.start).format('HH:mm')} - {moment(selectedEvent.end).format('HH:mm')}</p>
+          </div>
+        </div>
+      </div>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseModal}>
+      ปิด
+    </Button>
+  </Modal.Footer>
+</Modal>
+
       </div>
     </div>
   );
