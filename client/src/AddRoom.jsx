@@ -175,7 +175,7 @@ const AddRoomPage = () => {
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <div className="card p-5 my-5 bg-dark text-white rounded">
         <div className="card-header">
-          <h2>{editRoomId ? 'Edit Room' : 'Add Room'}</h2>
+          <h2>{editRoomId ? 'แก้ไขห้อง' : 'เพิ่มห้อง'}</h2>
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>

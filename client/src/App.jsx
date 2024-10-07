@@ -8,6 +8,7 @@ import Navbar from './components/nevbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button } from 'react-bootstrap'; // นำเข้า Modal และ Button
 
+
 const localizer = momentLocalizer(moment); // Initialize moment localizer for calendar
 
 // ฟังก์ชันแปลงปี ค.ศ. เป็น พ.ศ.
@@ -154,9 +155,10 @@ function App() {
   return (
     <div className="App">
       <Navbar /> {/* Navigation bar component */}
+
       <div className="container-fluid" style={{ marginTop: '40px' }}>
-        <div style={{height:'13vh' , backgroundColor:'gray' ,alignContent: 'center'}}>
-        <h1 className="" style={{backgroundColor: 'gray'}}>ปฏิทินจองห้อง</h1>
+        <div style={{padding: '35px' , backgroundColor:'#4169e1' ,alignContent: 'center',boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.6)'}}>
+        <h1 className="" style={{backgroundColor: '#4169e1', color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)'}}>ระบบจองห้อง SELF</h1>
         </div>
         {/* Badges for filtering events by RoomCenter */}
         <div className="row justify-content-end mb-3 mt-3">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Navbar from './components/nevbar';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -34,6 +35,7 @@ function LoginPage() {
 
   return (
     <div className="container mt-5">
+      <Navbar />
       <div className="card p-5 my-5 bg-dark text-white rounded">
         <div className="card-header">
           <h2>Login</h2>
