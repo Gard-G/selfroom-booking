@@ -249,7 +249,7 @@ app.get('/api/rooms-with-bookings', (req, res) => {
   SELECT lr.RoomID, lr.RoomName, lr.DetailRoom, lr.Image, ob.OrderBooking, ob.Date, ob.Start, ob.End, ob.Status
   FROM listroom lr
   LEFT JOIN orderbooking ob ON lr.RoomID = ob.RoomID 
-  AND (ob.Date > ? OR (ob.Date = ? AND ob.End >= ?))
+  AND (ob.Date > ? OR (ob.Date = ? AND CONCAT(ob.Date, ' ', ob.End) >= ?))
   AND ob.Status != 'reject'
   WHERE lr.RoomCenter = ?
   ORDER BY lr.RoomID, ob.Start
@@ -441,7 +441,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     WHERE RoomID = ? AND Date = ? AND Status != 'reject' AND (
       (Start < ? AND End > ?) OR
       (Start < ? AND End > ?) OR
-      (Start = ? AND End = ?)
+      (Start >= ? AND End <= ?)
     )
   `;
 
