@@ -16,7 +16,7 @@ const ApprovePage = () => {
       return;
     }
 
-    axios.get('http://localhost:5000/api/user-info', {
+    axios.get('/api/user-info', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -27,7 +27,7 @@ const ApprovePage = () => {
         navigate('/');
       } else {
         // Fetch bookings for approval
-        axios.get('http://localhost:5000/api/wait-bookings')
+        axios.get('/api/wait-bookings')
           .then(response => {
             setBookings(response.data);
           })
@@ -44,7 +44,7 @@ const ApprovePage = () => {
   }, [navigate]);
 
   const handleUpdateStatus = (OrderBooking, newStatus) => {
-    axios.put('http://localhost:5000/api/update-booking-status', { OrderBooking, newStatus })
+    axios.put('/api/update-booking-status', { OrderBooking, newStatus })
       .then(response => {
         setBookings(bookings.filter(booking => booking.OrderBooking !== OrderBooking));
       })

@@ -20,7 +20,7 @@ const AddRoomPage = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/user-info', {
+        const response = await axios.get('/api/user-info', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (response.data.IDstatus !== 'admin') {
@@ -35,7 +35,7 @@ const AddRoomPage = () => {
 
     const fetchCenters = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/room-centers');
+        const response = await axios.get('/api/room-centers');
         setCenters(response.data);
       } catch (error) {
         console.error('Error fetching room centers:', error);
@@ -44,7 +44,7 @@ const AddRoomPage = () => {
 
     const fetchRooms = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/rooms-all');
+        const response = await axios.get('/api/rooms-all');
         setRooms(response.data);
       } catch (error) {
         console.error('Error fetching rooms:', error);
@@ -74,7 +74,7 @@ const AddRoomPage = () => {
       const token = localStorage.getItem('token');
   
       if (editRoomId) {
-        const response = await axios.put(`http://localhost:5000/api/edit-room/${editRoomId}`, formData, {
+        const response = await axios.put(`/api/edit-room/${editRoomId}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
@@ -100,7 +100,7 @@ const AddRoomPage = () => {
           toast.error('Failed to update room. Please try again.');
         }
       } else {
-        const response = await axios.post('http://localhost:5000/api/add-room', formData, {
+        const response = await axios.post('/api/add-room', formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
@@ -150,7 +150,7 @@ const AddRoomPage = () => {
     if (confirmed) {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.delete(`http://localhost:5000/api/delete-room/${roomId}`, {
+        const response = await axios.delete(`/api/delete-room/${roomId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

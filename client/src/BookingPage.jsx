@@ -20,7 +20,7 @@ const BookingPage = () => {
   const selectedRoomID = queryParams.get('room');
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/rooms/${selectedRoomID}`)
+    axios.get(`/api/rooms/${selectedRoomID}`)
       .then(response => {
         setRoom(response.data);
       })
@@ -42,7 +42,7 @@ const BookingPage = () => {
     const endDateTime = `${date} ${endTime}`;
 
     try {
-      const response = await axios.post('http://localhost:5000/api/bookings', {
+      const response = await axios.post('/api/bookings', {
         RoomID: selectedRoomID,
         Date: date,
         Start: startDateTime,
