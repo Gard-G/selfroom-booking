@@ -428,56 +428,89 @@ app.delete('/api/delete-room/:id', (req, res) => {
 
 // Route to create a new booking
 app.post('/api/bookings', authenticateToken, (req, res) => {
-  const { RoomID, Date, Start, End, Name, Phone, Reason } = req.body;
+  const { RoomID, StartDate, EndDate, StartTime, EndTime, Name, Phone, Reason } = req.body;
   const userID = req.user.username; // Ensure userID is correct
 
-  if (!RoomID || !Date || !Start || !End || !Name || !Phone || !Reason) {
+  if (!RoomID || !StartDate || !EndDate || !StartTime || !EndTime || !Name || !Phone || !Reason) {
     return res.status(400).send('Missing required fields');
   }
 
-  // Check for overlapping bookings
-  const checkOverlapQuery = `
-    SELECT * FROM orderbooking
-    WHERE RoomID = ? AND Date = ? AND Status != 'reject' AND (
-      (Start < ? AND End > ?) OR
-      (Start < ? AND End > ?) OR
-      (Start >= ? AND End <= ?)
-    )
-  `;
+  // Convert StartDate and EndDate to Date objects
+  const startDateObj = new Date(StartDate);
+  const endDateObj = new Date(EndDate);
 
-  connection.query(checkOverlapQuery, [RoomID, Date, End, End, Start, Start, Start, End], (error, results) => {
-    if (error) {
-      console.error('Error checking for overlapping bookings:', error);
-      return res.status(500).json({ error: 'Error checking for overlapping bookings', details: error });
+  // Function to format date to YYYY-MM-DD
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Loop through each day between StartDate and EndDate
+  const createBookingForEachDay = (currentDate) => {
+    if (currentDate > endDateObj) {
+      return res.status(201).send('การจองสำเร็จ');
     }
 
-    if (results.length > 0) {
-      return res.status(400).send('ไม่สามารถจองได้เนื่องจากได้มีการจองในเวลานี้อยู่แล้ว');
-    }
+    const formattedDate = formatDate(currentDate);
+    const startDateTime = `${formattedDate} ${StartTime}`;
+    const endDateTime = `${formattedDate} ${EndTime}`;
 
-    // Proceed with booking creation
-    const query = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-    const status = 'wait';
+    // ตรวจสอบการจองที่ทับซ้อนกันโดยละเอียด
+    const checkOverlapQuery = `
+      SELECT * FROM orderbooking
+      WHERE RoomID = ? AND Date = ? AND Status != 'reject' AND (
+        (Start < ? AND End > ?) OR  -- เวลาจองใหม่อยู่ภายในช่วงที่จองอยู่เดิม
+        (Start < ? AND End > ?) OR  -- เวลาจองเดิมอยู่ภายในเวลาจองใหม่
+        (Start >= ? AND End <= ?)   -- กรณีที่เวลาจองใหม่เริ่มต้นและสิ้นสุดอยู่ภายในเวลาจองเดิม
+      )
+    `;
 
-    connection.query(query, [RoomID, Date, Start, End, status, Name, Phone, Reason], (error, results) => {
+    connection.query(checkOverlapQuery, [RoomID, formattedDate, endDateTime, startDateTime, startDateTime, endDateTime, startDateTime, endDateTime], (error, results) => {
       if (error) {
-        console.error('Error inserting booking:', error);
-        return res.status(500).json({ error: 'Error creating booking', details: error });
+        console.error('Error checking for overlapping bookings:', error);
+        return res.status(500).json({ error: 'Error checking for overlapping bookings', details: error });
       }
 
-      const orderBookingID = results.insertId;
+      if (results.length > 0) {
+        return res.status(400).send(`ไม่สามารถจองได้ในวันที่ ${formattedDate} มีการจองในเวลานั้นอยู่แล้ว`);
+      }
 
-      const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
-      connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
+      // Insert booking for the current day
+      const insertBookingQuery = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+      const status = 'wait';
+
+      connection.query(insertBookingQuery, [RoomID, formattedDate, startDateTime, endDateTime, status, Name, Phone, Reason], (error, results) => {
         if (error) {
-          console.error('Error inserting into userlistorder:', error);
-          return res.status(500).json({ error: 'Error linking user to booking', details: error });
+          console.error('Error inserting booking:', error);
+          return res.status(500).json({ error: 'Error creating booking', details: error });
         }
-        res.status(201).send('การจองสำเร็จ');
+
+        const orderBookingID = results.insertId;
+
+        // Link user to booking
+        const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
+        connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
+          if (error) {
+            console.error('Error inserting into userlistorder:', error);
+            return res.status(500).json({ error: 'Error linking user to booking', details: error });
+          }
+
+          // Move to the next day and create booking
+          currentDate.setDate(currentDate.getDate() + 1);
+          createBookingForEachDay(currentDate);
+        });
       });
     });
-  });
+  };
+
+  // เริ่มทำการจองในแต่ละวัน
+  createBookingForEachDay(startDateObj);
 });
+
+
+
 
 // ดึงรายชื่อ admin
 app.get('/api/admins', authenticateToken, (req, res) => {

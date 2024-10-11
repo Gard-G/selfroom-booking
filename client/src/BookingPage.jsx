@@ -7,7 +7,8 @@ import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 
 const BookingPage = () => {
   const [room, setRoom] = useState(null);
-  const [date, setDate] = useState('');
+  const [startDate, setStartDate] = useState('');  // เปลี่ยนจาก date เป็น startDate
+  const [endDate, setEndDate] = useState('');      // เพิ่ม endDate
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [name, setName] = useState('');
@@ -32,21 +33,20 @@ const BookingPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!date || !startTime || !endTime || !name || !phone || !reason) {
+    if (!startDate || !endDate || !startTime || !endTime || !name || !phone || !reason) {
       toast.error('Please fill in all fields.');
       return;
     }
 
     const token = localStorage.getItem('token');
-    const startDateTime = `${date} ${startTime}`;
-    const endDateTime = `${date} ${endTime}`;
 
     try {
       const response = await axios.post('/api/bookings', {
         RoomID: selectedRoomID,
-        Date: date,
-        Start: startDateTime,
-        End: endDateTime,
+        StartDate: startDate,  // ส่งค่า startDate ไปยัง backend
+        EndDate: endDate,      // ส่งค่า endDate ไปยัง backend
+        StartTime: startTime,
+        EndTime: endTime,
         Name: name,
         Phone: phone,
         Reason: reason
@@ -57,7 +57,9 @@ const BookingPage = () => {
       });
       toast.success(response.data);
 
-      setDate('');
+      // รีเซ็ตฟอร์ม
+      setStartDate('');
+      setEndDate('');
       setStartTime('');
       setEndTime('');
       setName('');
@@ -78,16 +80,31 @@ const BookingPage = () => {
         <h1 className="mt-4 mb-4">จองห้อง {room ? room.RoomName : ''}</h1>
         <form onSubmit={handleSubmit}>
 
-          <div className='form-group mb-3'>
-            <label htmlFor="date">วันที่:</label>
+        <div className = 'row'>
+          <div className='form-group mb-3 col-lg-6 col-12'>
+            <label htmlFor="startDate">วันที่เริ่ม:</label>
             <input
-              id="date"
+              id="startDate"
               type="date"
               className="form-control"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
             />
-            <small>จองวันที่: {date ? `${date.split('-')[2]} เดือน${date.split('-')[1]} ปี${date.split('-')[0]}` : ''}</small>
+            
+          </div>
+
+          <div className='form-group mb-3 col-lg-6 col-12'>
+            <label htmlFor="endDate">วันที่สิ้นสุด:</label>
+            <input
+              id="endDate"
+              type="date"
+              className="form-control"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+            
+          </div>
+         
           </div>
 
           <div className='row'>
