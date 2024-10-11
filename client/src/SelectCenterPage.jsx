@@ -37,15 +37,15 @@ const SelectCenterPage = () => {
   const getImageForCenter = (center) => {
     switch (center) {
       case 'ศูนย์เทเวศร์':
-        return '/image/IMG_6489-2.jpg';
+        return '/images/IMG_6489-2.jpg';
       case 'ศูนย์พณิชยการพระนคร':
-        return '/image/bus_buiding2.jpg';
+        return '/images/bus_buiding2.jpg';
       case 'ศูนย์พระนครเหนือ':
-        return '/image/bb1.jpg';
+        return '/images/bb1.jpg';
       case 'ศูนย์โชติเวช':
-        return '/image/Screenshot 2024-09-27 113057.png';
+        return '/images/Screenshot 2024-09-27 113057.png';
       default:
-        return '/image/IMG_6489-2.jpg';
+        return '/images/IMG_6489-2.jpg';
     }
   };
 
