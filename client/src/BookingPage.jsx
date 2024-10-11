@@ -100,6 +100,7 @@ const BookingPage = () => {
               type="date"
               className="form-control"
               value={endDate}
+              min={startDate} // ตั้งค่าต่ำสุดเป็นวันเริ่ม
               onChange={(e) => setEndDate(e.target.value)}
             />
             

@@ -56,14 +56,14 @@ const SelectCenterPage = () => {
         <h1 className="my-4">เลือกศูนย์ที่จะจอง</h1>
         {centers.map((center, index) => (
           <div className="col-md-3 mb-4" key={index}>
-            <div className="card" style={{ cursor: 'pointer' }}  onClick={() => handleCenterClick(center)}>
+            <div className="card" style={{ cursor: 'pointer', height: '100%' }} onClick={() => handleCenterClick(center)}>
               <img 
-                style={{ height: '25vh' }}
+                style={{ height: '200px', objectFit: 'cover' }} // ปรับความสูงและใช้ object-fit
                 src={getImageForCenter(center)}
                 className="card-img-top"
                 alt={center}
               />
-              <div className="card-body">
+              <div className="card-body d-flex flex-column">
                 <h4 className="card-title">{center}</h4>
               </div>
             </div>
