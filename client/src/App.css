@@ -76,6 +76,7 @@
 }
 
 .calenda-size{
+  max-width: 100%; /* ไม่ให้เกินขนาดหน้าจอ */
   width: 80vw;
   height: 70vh;
 }

@@ -56,6 +56,14 @@ const BookingPage = () => {
         }
       });
       toast.success(response.data);
+
+      setDate('');
+      setStartTime('');
+      setEndTime('');
+      setName('');
+      setPhone('');
+      setReason('');
+
     } catch (error) {
       console.error('Error creating booking:', error.response ? error.response.data : error.message);
       toast.error(error.response?.data || 'Failed to create booking.');
