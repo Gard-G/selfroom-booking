@@ -5,7 +5,18 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://salc.rmutp.ac.th:5000',
+      '/api': 'http://selfroom.rmutp.ac.th:5000',
     },
   },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // กำหนดให้ third-party libraries แยกออกเป็นไฟล์ chunk เอง
+          'vendor': ['react', 'react-dom']
+        }
+      }
+    }
+  }
 });
