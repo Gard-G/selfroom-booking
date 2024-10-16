@@ -462,7 +462,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     }
 
     if (results.length > 0) {
-      return res.status(400).send('ไม่สามารถจองในช่วงวันที่นี้ได้เนื่องจากมีการจองซ้ำ');
+      return res.status(400).send('ไม่สามารถจองในช่วงเวลานี้ในวันที่นี้ได้เนื่องจากมีการจองซ้ำ');
     }
 
     // Insert booking into orderbooking table
