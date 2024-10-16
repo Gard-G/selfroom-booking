@@ -327,7 +327,7 @@ app.get('/api/rooms/:id', (req, res) => {
 // Set up storage and file filter for multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/images/'); // Save uploaded images in 'public/images' directory
+    cb(null, 'public/imagesrooms/'); // Save uploaded images in 'public/images' directory
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
