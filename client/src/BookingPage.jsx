@@ -32,19 +32,31 @@ const BookingPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    
     if (!startDate || !endDate || !startTime || !endTime || !name || !phone || !reason) {
       toast.error('Please fill in all fields.');
       return;
     }
-
+    
+    // ตรวจสอบว่า endDate ไม่สามารถน้อยกว่า startDate
+    if (new Date(endDate) < new Date(startDate)) {
+      toast.error('End date cannot be earlier than start date.');
+      return;
+    }
+    
+    // ตรวจสอบว่าเวลา endTime ไม่สามารถน้อยกว่า startTime
+    if (startDate === endDate && startTime >= endTime) {
+      toast.error('End time cannot be earlier than or equal to start time on the same day.');
+      return;
+    }
+    
     const token = localStorage.getItem('token');
-
+  
     try {
       const response = await axios.post('/api/bookings', {
         RoomID: selectedRoomID,
-        StartDate: startDate,  // ส่งค่า startDate ไปยัง backend
-        EndDate: endDate,      // ส่งค่า endDate ไปยัง backend
+        StartDate: startDate,
+        EndDate: endDate,
         StartTime: startTime,
         EndTime: endTime,
         Name: name,
@@ -56,7 +68,7 @@ const BookingPage = () => {
         }
       });
       toast.success(response.data);
-
+  
       // รีเซ็ตฟอร์ม
       setStartDate('');
       setEndDate('');
@@ -65,12 +77,13 @@ const BookingPage = () => {
       setName('');
       setPhone('');
       setReason('');
-
+  
     } catch (error) {
       console.error('Error creating booking:', error.response ? error.response.data : error.message);
       toast.error(error.response?.data || 'Failed to create booking.');
     }
   };
+  
 
   return (
     <div className="container">

@@ -72,41 +72,51 @@ const StatusOrderPage = () => {
         ) : (
           <table className="table table-striped table-bordered mt-4">
             <thead className="table-dark">
-              <tr style={{fontSize: '20px'}}>
+              <tr style={{ fontSize: '20px' }}>
                 <th>ชื่อห้อง</th>
                 <th>ชื่อ-นามสกุล</th>
-                <th>วันที่</th>
+                <th>วันที่เริ่มจอง</th> {/* เปลี่ยนเป็น StartDate */}
+                <th>วันที่สิ้นสุด</th> {/* เพิ่ม EndDate */}
                 <th>เวลาเริ่ม</th>
                 <th>ถึงเวลา</th>
                 <th>สถานะ</th>
                 <th>Action</th> {/* New column for actions */}
               </tr>
             </thead>
-              <tbody className='table-info'>
-                {orders.map(order => (
-                  <tr key={order.OrderBooking}>
-                    <td>{order.RoomName}</td>
-                    <td>{order.Name}</td>
-                    <td>{order.Date}</td>
-                    <td>{order.Start}</td>
-                    <td>{order.End}</td>
-                    <td>{order.Status}</td>
-                    <td>
-                      <button 
-                        className="btn btn-danger"
-                        onClick={() => handleDelete(order.OrderBooking)}
-                      >
-                        ลบ
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+            <tbody className='table-info'>
+              {orders.map(order => (
+                <tr key={order.OrderBooking}>
+                  <td>{order.RoomName}</td>
+                  <td>{order.Name}</td>
+                  <td>{new Date(order.StartDate).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}</td> {/* แสดง StartDate */}
+                  <td>{new Date(order.EndDate).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}</td> {/* แสดง EndDate */}
+                  <td>{new Date(`1970-01-01T${order.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</td> {/* แสดง Start */}
+                  <td>{new Date(`1970-01-01T${order.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</td> {/* แสดง End */}
+                  <td>{order.Status}</td>
+                  <td>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(order.OrderBooking)}
+                    >
+                      ลบ
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         )}
       </div>
     </div>
   );
-}
+};
 
 export default StatusOrderPage;

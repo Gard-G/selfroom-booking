@@ -8,7 +8,6 @@ const ApprovePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch user info to check if the user is an admin
     const token = localStorage.getItem('token');
     if (!token) {
       alert('You need to log in first');
@@ -26,7 +25,6 @@ const ApprovePage = () => {
         alert('Access denied: Admins only');
         navigate('/');
       } else {
-        // Fetch bookings for approval
         axios.get('/api/wait-bookings')
           .then(response => {
             setBookings(response.data);
@@ -63,7 +61,8 @@ const ApprovePage = () => {
             <thead className='table-dark '>
               <tr style={{fontSize: '20px'}}>
                 <th>ชื่อ-นามสกุล</th>
-                <th>วันที่</th>
+                <th>วันที่เริ่มจอง</th>
+                <th>วันที่สิ้นสุด</th>
                 <th>ชื่อห้อง</th>
                 <th>เวลาเริ่ม</th>
                 <th>ถึงเวลา</th>
@@ -76,10 +75,19 @@ const ApprovePage = () => {
               {bookings.map(booking => (
                 <tr key={booking.OrderBooking}>
                   <td>{booking.Name}</td>
-                  <td>{booking.Date}</td>
+                  <td>{new Date(booking.StartDate).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}</td>
+                  <td>{new Date(booking.EndDate).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}</td>
                   <td>{booking.RoomName}</td>
-                  <td>{booking.Start}</td>
-                  <td>{booking.End}</td>
+                  <td>{new Date(`1970-01-01T${booking.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(":", ".")}</td> {/* แสดง StartTime */}
+                  <td>{new Date(`1970-01-01T${booking.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(":", ".")}</td> {/* แสดง EndTime */}
                   <td>{booking.Phone}</td>
                   <td>{booking.Reason}</td>
                   <td>

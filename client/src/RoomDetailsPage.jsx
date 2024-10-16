@@ -27,7 +27,6 @@ const RoomDetailsPage = () => {
       });
   }, [selectedCenter]);
 
-  console.log(rooms); // ตรวจสอบค่า `rooms` และ `room.Image`
   const handleRoomSelect = (roomID) => {
     navigate(`/booking?center=${selectedCenter}&room=${roomID}`);
   };
@@ -57,18 +56,18 @@ const RoomDetailsPage = () => {
           {rooms.map(room => (
             <div className="col-md-6 mb-4" key={room.RoomID}>
               <div className="card">
-                
+
                 <div className="card-body">
                   <h3 className="card-title">{room.RoomName}</h3>
                   {/* Show room image */}
-                {room.Image && (
-                  <img
-                    src={`http://selfroom.rmutp.ac.th:5000/images/${room.Image}`} // Correctly use the image URL
-                    alt={room.RoomName}
-                    className="img-fluid mb-3"
-                    style={{ width: '230px', height: '160px', objectFit: 'cover' }}
-                  />
-                )}
+                  {room.Image && (
+                    <img
+                      src={`http://localhost:5000/images/${room.Image}`} // Correctly use the image URL
+                      alt={room.RoomName}
+                      className="img-fluid mb-3"
+                      style={{ width: '230px', height: '160px', objectFit: 'cover' }}
+                    />
+                  )}
                   <h5 className="card-text">รายละเอียดห้อง:</h5>
                   <h5 className="card-text mb-4">{room.DetailRoom}</h5>
 
@@ -88,17 +87,24 @@ const RoomDetailsPage = () => {
                             {room.bookings.map((booking, index) => (
                               <li key={index} className="mb-2">
                                 <span className="d-block">
-                                  <strong>วันที่:</strong> {new Date(booking.Start).toLocaleDateString('th-TH', {
+                                  <strong>วันที่เริ่ม:</strong> {new Date(booking.StartDate).toLocaleDateString('th-TH', {
                                     day: '2-digit',
                                     month: 'short',
                                     year: 'numeric',
                                   })}
                                 </span>
                                 <span className="d-block">
-                                  <strong>เวลาเริ่ม:</strong> {new Date(booking.Start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                  <strong>วันที่สิ้นสุด:</strong> {new Date(booking.EndDate).toLocaleDateString('th-TH', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })}
                                 </span>
                                 <span className="d-block">
-                                  <strong>จนถึง:</strong> {new Date(booking.End).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                  <strong>เวลาเริ่ม:</strong> {new Date(`1970-01-01T${booking.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.')}
+                                </span>
+                                <span className="d-block">
+                                  <strong>จนถึง:</strong> {new Date(`1970-01-01T${booking.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.')}
                                 </span>
                               </li>
                             ))}

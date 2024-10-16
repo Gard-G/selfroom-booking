@@ -84,27 +84,35 @@ function App() {
   useEffect(() => {
     axios.get('/api/bookings')
       .then(response => {
-        // Format the events received from the API
         const formattedEvents = response.data
-          .filter(booking => booking.Status === 'booking') // Filter only bookings with 'booking' status
+          .filter(booking => booking.Status === 'booking') // ฟิลเตอร์เฉพาะการจองที่มีสถานะ 'booking'
           .map(booking => {
-            const start = new Date(booking.Start); // Convert start date to JavaScript Date object
-            const end = new Date(booking.End); // Convert end date to JavaScript Date object
+            // สร้าง Date object สำหรับวันและเวลาเริ่มต้น
+            const startDate = new Date(booking.StartDate); // วันเริ่มต้น
+            const startTime = booking.Start.split(':'); // แยกเวลาที่เริ่ม
+            startDate.setHours(startTime[0], startTime[1]); // ตั้งค่าชั่วโมงและนาที
+  
+            // สร้าง Date object สำหรับวันและเวลาสิ้นสุด
+            const endDate = new Date(booking.EndDate); // วันสิ้นสุด
+            const endTime = booking.End.split(':'); // แยกเวลาที่สิ้นสุด
+            endDate.setHours(endTime[0], endTime[1]); // ตั้งค่าชั่วโมงและนาที
+  
             return {
-              title: `${booking.RoomName} - ${booking.Name} - ${booking.Phone} - ${booking.Reason}`, // Event title
-              start,
-              end,
-              RoomCenter: booking.RoomCenter, // Store the room center for filtering
-              ...booking // Store the entire booking object for later use
+              title: `${booking.RoomName} - ${booking.Name} - ${booking.Phone} - ${booking.Reason}`, // ชื่อเหตุการณ์
+              start: startDate,
+              end: endDate,
+              RoomCenter: booking.RoomCenter, // เก็บชื่อศูนย์ห้องสำหรับการกรอง
+              ...booking // เก็บวัตถุการจองทั้งหมดเพื่อใช้งานในภายหลัง
             };
           });
-
-        setEvents(formattedEvents); // Update the state with the formatted events
+  
+        setEvents(formattedEvents); // อัปเดตสถานะด้วยเหตุการณ์ที่จัดรูปแบบแล้ว
       })
       .catch(error => {
-        console.error('Error fetching bookings:', error); // Handle any errors during the API call
+        console.error('Error fetching bookings:', error); // จัดการกับข้อผิดพลาดระหว่างการเรียก API
       });
-  }, []); // Empty dependency array means this effect runs once when the component mounts
+  }, []);
+    // Empty dependency array means this effect runs once when the component mounts
 
   // Function to customize the style of events based on their RoomCenter
   const eventStyleGetter = (event) => {
@@ -237,7 +245,7 @@ function App() {
             <p><strong>ชื่อ-นามสกุล:</strong> {selectedEvent.Name}</p>
             <p><strong>เบอร์โทร:</strong> {selectedEvent.Phone}</p>
             <p><strong>ใช้ทำอะไร:</strong> {selectedEvent.Reason}</p>
-            <p><strong>วันที่:</strong> {moment(selectedEvent.start).format('DD/MM/YYYY')}</p>
+            <p><strong>วันที่:</strong> {moment(selectedEvent.start).format('DD/MM/YYYY')} - {moment(selectedEvent.end).format('DD/MM/YYYY')}</p>
             <p><strong>เวลา:</strong> {moment(selectedEvent.start).format('HH:mm')} - {moment(selectedEvent.end).format('HH:mm')}</p>
           </div>
         </div>

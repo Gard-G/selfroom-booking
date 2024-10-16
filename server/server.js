@@ -101,7 +101,7 @@ app.get('/api/user-orders', authenticateToken, (req, res) => {
   const userID = req.user.username; // Adjust if needed
 
   const query = `
-    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Status, lr.RoomName
+    SELECT ob.OrderBooking, ob.Name, ob.StartDate, ob.EndDate, ob.Start, ob.End, ob.Status, lr.RoomName
     FROM orderbooking ob
     JOIN userlistorder ulo ON ob.OrderBooking = ulo.OrderBooking
     JOIN listroom lr ON ob.RoomID = lr.RoomID
@@ -113,29 +113,36 @@ app.get('/api/user-orders', authenticateToken, (req, res) => {
       return res.status(500).send('Error fetching data from database');
     }
 
-    const formattedResults = results.map(booking => ({
-      ...booking,
-      Date: new Date(booking.Date).toLocaleDateString(),
-      Start: new Date(booking.Start).toLocaleTimeString(),
-      End: new Date(booking.End).toLocaleTimeString()
-    }));
-
-    res.json(formattedResults);
+    // ส่งผลลัพธ์โดยไม่ทำการแปลงวันที่ที่นี่
+    res.json(results);
   });
 });
+
 
 // Protected route example
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.send('This is a protected route');
 });
 
-// Route to fetch bookings
+// Route to fetch bookings 
 app.get('/api/bookings', (req, res) => {
   const query = `
-    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName, lr.RoomCenter
+    SELECT 
+      ob.OrderBooking, 
+      ob.Name, 
+      ob.StartDate, 
+      ob.EndDate, 
+      ob.Start, 
+      ob.End, 
+      ob.Phone, 
+      ob.Reason, 
+      ob.Status, 
+      lr.RoomName, 
+      lr.RoomCenter
     FROM orderbooking ob
     JOIN listroom lr ON ob.RoomID = lr.RoomID
   `;
+  
   connection.query(query, (error, results) => {
     if (error) {
       res.status(500).send('Error fetching data from database');
@@ -145,10 +152,11 @@ app.get('/api/bookings', (req, res) => {
   });
 });
 
+
 // Route to fetch bookings with "wait" status
 app.get('/api/wait-bookings', (req, res) => {
   const query = `
-    SELECT ob.OrderBooking, ob.Name, ob.Date, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName
+    SELECT ob.OrderBooking, ob.Name, ob.StartDate, ob.EndDate, ob.Start, ob.End, ob.Phone, ob.Reason, ob.Status, lr.RoomName
     FROM orderbooking ob
     JOIN listroom lr ON ob.RoomID = lr.RoomID
     WHERE ob.Status = 'wait'
@@ -159,17 +167,11 @@ app.get('/api/wait-bookings', (req, res) => {
       return;
     }
     
-    // Format the date fields BEFORE sending the response
-    const formattedResults = results.map(booking => ({
-      ...booking,
-      Date: new Date(booking.Date).toLocaleDateString(),
-      Start: new Date(booking.Start).toLocaleTimeString(),
-      End: new Date(booking.End).toLocaleTimeString()
-    }));
-    
-    res.json(formattedResults);
+    res.json(results);
   });
 });
+
+
 
 // Route to update booking status
 app.put('/api/update-booking-status', (req, res) => {
@@ -238,7 +240,7 @@ app.get('/api/room-centers', (req, res) => {
 });
 
 
-//fetch rooms with their bookings
+// Fetch rooms with their bookings
 app.get('/api/rooms-with-bookings', (req, res) => {
   const selectedCenter = req.query.center;
   const currentDate = new Date().toISOString().slice(0, 10);  // Get current date in 'YYYY-MM-DD' format
@@ -246,14 +248,14 @@ app.get('/api/rooms-with-bookings', (req, res) => {
 
   // Query to fetch rooms with their bookings
   const query = `
-  SELECT lr.RoomID, lr.RoomName, lr.DetailRoom, lr.Image, ob.OrderBooking, ob.Date, ob.Start, ob.End, ob.Status
+  SELECT lr.RoomID, lr.RoomName, lr.DetailRoom, lr.Image, ob.OrderBooking, ob.StartDate, ob.EndDate, ob.Start, ob.End, ob.Status
   FROM listroom lr
   LEFT JOIN orderbooking ob ON lr.RoomID = ob.RoomID 
-  AND (ob.Date > ? OR (ob.Date = ? AND CONCAT(ob.Date, ' ', ob.End) >= ?))
+  AND (ob.EndDate > ? OR (ob.EndDate = ? AND CONCAT(ob.EndDate, ' ', ob.End) >= ?))
   AND ob.Status != 'reject'
   WHERE lr.RoomCenter = ?
   ORDER BY lr.RoomID, ob.Start
-`;
+  `;
 
   connection.query(query, [currentDate, currentDate, currentTime, selectedCenter], (error, results) => {
     if (error) {
@@ -279,7 +281,8 @@ app.get('/api/rooms-with-bookings', (req, res) => {
       if (row.OrderBooking) {
         roomMap[row.RoomID].bookings.push({
           OrderBooking: row.OrderBooking,
-          Date: row.Date,
+          StartDate: row.StartDate,
+          EndDate: row.EndDate,
           Start: row.Start,
           End: row.End,
           Status: row.Status,
@@ -290,6 +293,7 @@ app.get('/api/rooms-with-bookings', (req, res) => {
     res.json(rooms);
   });
 });
+
 
 
 
@@ -429,85 +433,68 @@ app.delete('/api/delete-room/:id', (req, res) => {
 // Route to create a new booking
 app.post('/api/bookings', authenticateToken, (req, res) => {
   const { RoomID, StartDate, EndDate, StartTime, EndTime, Name, Phone, Reason } = req.body;
-  const userID = req.user.username; // Ensure userID is correct
+  const userID = req.user.username;
 
   if (!RoomID || !StartDate || !EndDate || !StartTime || !EndTime || !Name || !Phone || !Reason) {
     return res.status(400).send('Missing required fields');
   }
 
-  // Convert StartDate and EndDate to Date objects
-  const startDateObj = new Date(StartDate);
-  const endDateObj = new Date(EndDate);
+  // ตรวจสอบการจองที่ทับซ้อนกัน
+  const checkOverlapQuery = `
+    SELECT * FROM orderbooking
+    WHERE RoomID = ? AND Status != 'reject' AND (
+      (StartDate = ? AND Start < ? AND End > ?) OR  
+      (StartDate = ? AND Start < ? AND End > ?) OR  
+      (StartDate BETWEEN ? AND ? AND Start < ? AND End > ?)  
+    )
+  `;
 
-  // Function to format date to YYYY-MM-DD
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Loop through each day between StartDate and EndDate
-  const createBookingForEachDay = (currentDate) => {
-    if (currentDate > endDateObj) {
-      return res.status(201).send('การจองสำเร็จ');
+  connection.query(checkOverlapQuery, [
+    RoomID,
+    StartDate, StartTime, EndTime,   // For the first condition
+    StartDate, EndTime, StartTime,    // For the second condition
+    StartDate, EndDate,               // For the third condition (date range)
+    StartTime, EndTime                // Start and End times for overlap check
+  ], (error, results) => {
+    if (error) {
+      console.error('Error checking for overlapping bookings:', error);
+      return res.status(500).json({ error: 'Error checking for overlapping bookings', details: error });
     }
 
-    const formattedDate = formatDate(currentDate);
-    const startDateTime = `${formattedDate} ${StartTime}`;
-    const endDateTime = `${formattedDate} ${EndTime}`;
+    if (results.length > 0) {
+      return res.status(400).send('ไม่สามารถจองในช่วงวันที่นี้ได้เนื่องจากมีการจองซ้ำ');
+    }
 
-    // ตรวจสอบการจองที่ทับซ้อนกันโดยละเอียด
-    const checkOverlapQuery = `
-      SELECT * FROM orderbooking
-      WHERE RoomID = ? AND Date = ? AND Status != 'reject' AND (
-        (Start < ? AND End > ?) OR  -- เวลาจองใหม่อยู่ภายในช่วงที่จองอยู่เดิม
-        (Start < ? AND End > ?) OR  -- เวลาจองเดิมอยู่ภายในเวลาจองใหม่
-        (Start >= ? AND End <= ?)   -- กรณีที่เวลาจองใหม่เริ่มต้นและสิ้นสุดอยู่ภายในเวลาจองเดิม
-      )
-    `;
+    // Insert booking into orderbooking table
+    const insertBookingQuery = 'INSERT INTO orderbooking (RoomID, StartDate, EndDate, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const status = 'wait';
 
-    connection.query(checkOverlapQuery, [RoomID, formattedDate, endDateTime, startDateTime, startDateTime, endDateTime, startDateTime, endDateTime], (error, results) => {
+    connection.query(insertBookingQuery, [RoomID, StartDate, EndDate, StartTime, EndTime, status, Name, Phone, Reason], (error, results) => {
       if (error) {
-        console.error('Error checking for overlapping bookings:', error);
-        return res.status(500).json({ error: 'Error checking for overlapping bookings', details: error });
+        console.error('Error inserting booking:', error);
+        return res.status(500).json({ error: 'Error creating booking', details: error });
       }
 
-      if (results.length > 0) {
-        return res.status(400).send(`ไม่สามารถจองได้ในวันที่ ${formattedDate} มีการจองในเวลานั้นอยู่แล้ว`);
-      }
+      const orderBookingID = results.insertId;
 
-      // Insert booking for the current day
-      const insertBookingQuery = 'INSERT INTO orderbooking (RoomID, Date, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-      const status = 'wait';
-
-      connection.query(insertBookingQuery, [RoomID, formattedDate, startDateTime, endDateTime, status, Name, Phone, Reason], (error, results) => {
+      // Link user to booking
+      const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
+      connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
         if (error) {
-          console.error('Error inserting booking:', error);
-          return res.status(500).json({ error: 'Error creating booking', details: error });
+          console.error('Error linking user to booking:', error);
+          return res.status(500).json({ error: 'Error linking user to booking', details: error });
         }
 
-        const orderBookingID = results.insertId;
-
-        // Link user to booking
-        const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
-        connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
-          if (error) {
-            console.error('Error inserting into userlistorder:', error);
-            return res.status(500).json({ error: 'Error linking user to booking', details: error });
-          }
-
-          // Move to the next day and create booking
-          currentDate.setDate(currentDate.getDate() + 1);
-          createBookingForEachDay(currentDate);
-        });
+        return res.status(201).send('การจองสำเร็จ');
       });
     });
-  };
-
-  // เริ่มทำการจองในแต่ละวัน
-  createBookingForEachDay(startDateObj);
+  });
 });
+
+
+
+
+
 
 
 
