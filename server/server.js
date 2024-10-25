@@ -18,20 +18,16 @@ app.use(cors());
 app.use(express.json());
 app.use('/images', express.static('public/images'));
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+  waitForConnections: true,
+  connectionLimit: 20, // จำนวนการเชื่อมต่อสูงสุดใน pool
+  queueLimit: 0
 });
 
-connection.connect(error => {
-  if (error) {
-    console.error('Error connecting to MySQL:', error);
-    return;
-  }
-  console.log('Connected to MySQL');
-});
 
 // Middleware to protect routes
 const authenticateToken = (req, res, next) => {
@@ -80,7 +76,7 @@ app.post('/api/login', (req, res) => {
     }
 
     const query = 'SELECT * FROM adminlist WHERE Username = ?';
-    connection.query(query, [username], (error, results) => {
+    pool.query(query, [username], (error, results) => {
       if (error) {
         console.error('Error querying adminlist:', error);
         return res.status(500).send('Error checking admin status');
@@ -108,7 +104,7 @@ app.get('/api/user-orders', authenticateToken, (req, res) => {
     WHERE ulo.UserID = ?
   `;
   
-  connection.query(query, [userID], (error, results) => {
+  pool.query(query, [userID], (error, results) => {
     if (error) {
       return res.status(500).send('Error fetching data from database');
     }
@@ -143,7 +139,7 @@ app.get('/api/bookings', (req, res) => {
     JOIN listroom lr ON ob.RoomID = lr.RoomID
   `;
   
-  connection.query(query, (error, results) => {
+  pool.query(query, (error, results) => {
     if (error) {
       res.status(500).send('Error fetching data from database');
       return;
@@ -161,7 +157,7 @@ app.get('/api/wait-bookings', (req, res) => {
     JOIN listroom lr ON ob.RoomID = lr.RoomID
     WHERE ob.Status = 'wait'
   `;
-  connection.query(query, (error, results) => {
+  pool.query(query, (error, results) => {
     if (error) {
       res.status(500).send('Error fetching data from database');
       return;
@@ -178,7 +174,7 @@ app.put('/api/update-booking-status', (req, res) => {
   const { OrderBooking, newStatus } = req.body;
 
   const query = 'UPDATE orderbooking SET Status = ? WHERE OrderBooking = ?';
-  connection.query(query, [newStatus, OrderBooking], (error, results) => {
+  pool.query(query, [newStatus, OrderBooking], (error, results) => {
     if (error) {
       res.status(500).send('Error updating booking status');
       return;
@@ -194,7 +190,7 @@ app.delete('/api/orders/:id', (req, res) => {
   // First delete any references in the userlistorder table
   const deleteReferencesQuery = 'DELETE FROM userlistorder WHERE OrderBooking = ?';
   
-  connection.query(deleteReferencesQuery, [id], (error) => {
+  pool.query(deleteReferencesQuery, [id], (error) => {
     if (error) {
       console.error('Error deleting references:', error);
       return res.status(500).json({ message: 'Failed to delete references. Please try again later.' });
@@ -203,7 +199,7 @@ app.delete('/api/orders/:id', (req, res) => {
     // Now delete the order
     const deleteOrderQuery = 'DELETE FROM orderbooking WHERE OrderBooking = ?';
     
-    connection.query(deleteOrderQuery, [id], (error, results) => {
+    pool.query(deleteOrderQuery, [id], (error, results) => {
       if (error) {
         console.error('Error deleting order:', error);
         return res.status(500).json({ message: 'Failed to delete order. Please try again later.' });
@@ -222,7 +218,7 @@ app.delete('/api/orders/:id', (req, res) => {
 app.get('/api/rooms', (req, res) => {
   const selectedCenter = req.query.center;
   // Query your database for rooms based on the selectedCenter
-  connection.query('SELECT * FROM listroom WHERE RoomCenter = ?', [selectedCenter], (error, results) => {
+  pool.query('SELECT * FROM listroom WHERE RoomCenter = ?', [selectedCenter], (error, results) => {
     if (error) {
       console.error('Error fetching rooms:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -257,7 +253,7 @@ app.get('/api/rooms-with-bookings', (req, res) => {
   ORDER BY lr.RoomID, ob.Start
   `;
 
-  connection.query(query, [currentDate, currentDate, currentTime, selectedCenter], (error, results) => {
+  pool.query(query, [currentDate, currentDate, currentTime, selectedCenter], (error, results) => {
     if (error) {
       console.error('Error fetching rooms with bookings:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -309,7 +305,7 @@ app.get('/api/rooms/:id', (req, res) => {
   }
 
   const query = 'SELECT * FROM listroom WHERE RoomID = ?';
-  connection.query(query, [roomID], (error, results) => {
+  pool.query(query, [roomID], (error, results) => {
     if (error) {
       console.error('Error fetching room details:', error);
       return res.status(500).send('Error fetching room details');
@@ -344,7 +340,7 @@ app.post('/api/add-room', upload.single('Image'), (req, res) => {
   const query = 'INSERT INTO listroom (RoomName, RoomCenter, DetailRoom, Image) VALUES (?, ?, ?, ?)';
 const values = [RoomName, RoomCenter, DetailRoom, image];
 
-connection.query(query, values, (err, results) => {
+pool.query(query, values, (err, results) => {
   if (err) {
     console.error('Error inserting room:', err);
     res.status(500).json({ error: 'Failed to add room.' });
@@ -366,7 +362,7 @@ connection.query(query, values, (err, results) => {
 // Get all rooms
 app.get('/api/rooms-all', (req, res) => {
   const query = 'SELECT * FROM listroom';
-  connection.query(query, (err, results) => {
+  pool.query(query, (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
@@ -392,7 +388,7 @@ app.put('/api/edit-room/:id', upload.single('Image'), (req, res) => {
   query += ' WHERE RoomID = ?';
   values.push(id);
 
-  connection.query(query, values, (error, results) => {
+  pool.query(query, values, (error, results) => {
     if (error) {
       console.error('Error updating room:', error);
       return res.status(500).send('Error updating room');
@@ -413,7 +409,7 @@ app.delete('/api/delete-room/:id', (req, res) => {
   const { id } = req.params;
   
   const deleteRoomQuery = 'DELETE FROM listroom WHERE RoomID = ?';
-  connection.query(deleteRoomQuery, [id], (error, results) => {
+  pool.query(deleteRoomQuery, [id], (error, results) => {
     if (error) {
       console.error('Error deleting room:', error);
       return res.status(500).json({ message: 'Failed to delete room. Please try again later.' });
@@ -449,7 +445,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     )
   `;
 
-  connection.query(checkOverlapQuery, [
+  pool.query(checkOverlapQuery, [
     RoomID,
     StartDate, StartTime, EndTime,   // For the first condition
     StartDate, EndTime, StartTime,    // For the second condition
@@ -469,7 +465,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     const insertBookingQuery = 'INSERT INTO orderbooking (RoomID, StartDate, EndDate, Start, End, Status, Name, Phone, Reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
     const status = 'wait';
 
-    connection.query(insertBookingQuery, [RoomID, StartDate, EndDate, StartTime, EndTime, status, Name, Phone, Reason], (error, results) => {
+    pool.query(insertBookingQuery, [RoomID, StartDate, EndDate, StartTime, EndTime, status, Name, Phone, Reason], (error, results) => {
       if (error) {
         console.error('Error inserting booking:', error);
         return res.status(500).json({ error: 'Error creating booking', details: error });
@@ -479,7 +475,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
 
       // Link user to booking
       const userListOrderQuery = 'INSERT INTO userlistorder (UserID, OrderBooking) VALUES (?, ?)';
-      connection.query(userListOrderQuery, [userID, orderBookingID], (error) => {
+      pool.query(userListOrderQuery, [userID, orderBookingID], (error) => {
         if (error) {
           console.error('Error linking user to booking:', error);
           return res.status(500).json({ error: 'Error linking user to booking', details: error });
@@ -502,7 +498,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
 // ดึงรายชื่อ admin
 app.get('/api/admins', authenticateToken, (req, res) => {
   const query = 'SELECT Username FROM adminlist';
-  connection.query(query, (err, results) => {
+  pool.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching admins:', err);
       return res.status(500).send(err);
@@ -515,7 +511,7 @@ app.get('/api/admins', authenticateToken, (req, res) => {
 app.post('/api/admins', authenticateToken, (req, res) => {
   const { username } = req.body;
   const query = 'INSERT INTO adminlist (Username) VALUES (?)';
-  connection.query(query, [username], (err, result) => {
+  pool.query(query, [username], (err, result) => {
     if (err) {
       console.error('Error adding admin:', err);
       return res.status(500).send(err);
@@ -528,7 +524,7 @@ app.post('/api/admins', authenticateToken, (req, res) => {
 app.delete('/api/admins/:username', authenticateToken, (req, res) => {
   const { username } = req.params;
   const query = 'DELETE FROM adminlist WHERE Username = ?';
-  connection.query(query, [username], (err, result) => {
+  pool.query(query, [username], (err, result) => {
     if (err) {
       console.error('Error deleting admin:', err);
       return res.status(500).send(err);
