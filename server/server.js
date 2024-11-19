@@ -488,7 +488,109 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
 });
 
 
+// Route to create a new booking แบบ วันทั้งเดือน
+app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
+  const { RoomID, DayOfWeek, StartTime, EndTime, Name, Phone, Reason } = req.body;
+  const userID = req.user.username;
 
+  if (!RoomID || !DayOfWeek || !StartTime || !EndTime || !Name || !Phone || !Reason) {
+    return res.status(400).send('Missing required fields');
+  }
+
+  // กำหนดโซนเวลาไทย
+  const toThaiTime = (date) => {
+    const offset = 7 * 60 * 60 * 1000; // UTC+7
+    return new Date(date.getTime() + offset);
+  };
+
+  // คำนวณวันทั้งหมดของวันที่เลือกในเดือนปัจจุบัน
+  const today = new Date();
+  const startDate = toThaiTime(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
+  const endDate = toThaiTime(new Date(today.getFullYear(), today.getMonth() + 1, 0));
+  const dayMap = { Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
+
+  const selectedDay = dayMap[DayOfWeek];
+  const bookings = [];
+
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const currentDate = new Date(d);
+    if (currentDate.getDay() === selectedDay) {
+      const formattedDate = toThaiTime(currentDate).toISOString().split('T')[0];
+      bookings.push([RoomID, formattedDate, formattedDate, StartTime, EndTime, 'wait', Name, Phone, Reason]);
+    }
+  }
+
+  if (bookings.length === 0) {
+    return res.status(400).send(`ไม่มีวัน ${DayOfWeek} ให้จองในเดือนนี้`);
+  }
+
+  // ตรวจสอบว่ามีการจองที่ทับซ้อนหรือไม่
+  const checkOverlapQuery = `
+    SELECT * FROM orderbooking
+    WHERE RoomID = ? AND Status != 'reject' AND (
+      (StartDate = ? AND Start < ? AND End > ?) OR  
+      (StartDate = ? AND Start < ? AND End > ?) OR  
+      (StartDate BETWEEN ? AND ? AND Start < ? AND End > ?)
+    )
+  `;
+
+  const overlapPromises = bookings.map(([roomId, startDate]) => {
+    return new Promise((resolve, reject) => {
+      pool.query(checkOverlapQuery, [
+        roomId,
+        startDate, StartTime, EndTime,  // First condition
+        startDate, EndTime, StartTime,  // Second condition
+        startDate, startDate, StartTime, EndTime // Third condition (range check)
+      ], (error, results) => {
+        if (error) return reject(error);
+        if (results.length > 0) return resolve(true); // มีการจองที่ทับซ้อน
+        return resolve(false);
+      });
+    });
+  });
+
+  Promise.all(overlapPromises)
+    .then((overlaps) => {
+      if (overlaps.includes(true)) {
+        return res.status(400).send('ไม่สามารถจองในบางวันได้เนื่องจากมีการจองซ้ำ');
+      }
+
+      // ถ้าไม่มีการจองทับซ้อน -> ทำการบันทึก
+      const insertBookingQuery = `
+        INSERT INTO orderbooking (RoomID, StartDate, EndDate, Start, End, Status, Name, Phone, Reason)
+        VALUES ?
+      `;
+
+      pool.query(insertBookingQuery, [bookings], (error, result) => {
+        if (error) {
+          console.error('Error creating weekly bookings:', error);
+          return res.status(500).json({ error: 'Error creating weekly bookings', details: error });
+        }
+
+        const orderBookingIDs = result.insertId;
+        const userListOrderEntries = bookings.map((_, index) => [
+          userID,
+          orderBookingIDs + index,
+        ]);
+
+        const userListOrderQuery = `
+          INSERT INTO userlistorder (UserID, OrderBooking) VALUES ?
+        `;
+        pool.query(userListOrderQuery, [userListOrderEntries], (error) => {
+          if (error) {
+            console.error('Error linking user to booking:', error);
+            return res.status(500).json({ error: 'Error linking user to booking', details: error });
+          }
+
+          return res.status(201).send('การจองสำเร็จ');
+        });
+      });
+    })
+    .catch((error) => {
+      console.error('Error checking overlapping bookings:', error);
+      return res.status(500).json({ error: 'Error checking overlapping bookings', details: error });
+    });
+});
 
 
 
