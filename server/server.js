@@ -103,7 +103,7 @@ app.get('/api/user-orders', authenticateToken, (req, res) => {
     JOIN listroom lr ON ob.RoomID = lr.RoomID
     WHERE ulo.UserID = ?
   `;
-  
+
   pool.query(query, [userID], (error, results) => {
     if (error) {
       return res.status(500).send('Error fetching data from database');
@@ -138,7 +138,7 @@ app.get('/api/bookings', (req, res) => {
     FROM orderbooking ob
     JOIN listroom lr ON ob.RoomID = lr.RoomID
   `;
-  
+
   pool.query(query, (error, results) => {
     if (error) {
       res.status(500).send('Error fetching data from database');
@@ -162,7 +162,7 @@ app.get('/api/wait-bookings', (req, res) => {
       res.status(500).send('Error fetching data from database');
       return;
     }
-    
+
     res.json(results);
   });
 });
@@ -189,7 +189,7 @@ app.delete('/api/orders/:id', (req, res) => {
 
   // First delete any references in the userlistorder table
   const deleteReferencesQuery = 'DELETE FROM userlistorder WHERE OrderBooking = ?';
-  
+
   pool.query(deleteReferencesQuery, [id], (error) => {
     if (error) {
       console.error('Error deleting references:', error);
@@ -198,7 +198,7 @@ app.delete('/api/orders/:id', (req, res) => {
 
     // Now delete the order
     const deleteOrderQuery = 'DELETE FROM orderbooking WHERE OrderBooking = ?';
-    
+
     pool.query(deleteOrderQuery, [id], (error, results) => {
       if (error) {
         console.error('Error deleting order:', error);
@@ -338,24 +338,24 @@ app.post('/api/add-room', upload.single('Image'), (req, res) => {
 
   // Insert room details and image filename into database
   const query = 'INSERT INTO listroom (RoomName, RoomCenter, DetailRoom, Image) VALUES (?, ?, ?, ?)';
-const values = [RoomName, RoomCenter, DetailRoom, image];
+  const values = [RoomName, RoomCenter, DetailRoom, image];
 
-pool.query(query, values, (err, results) => {
-  if (err) {
-    console.error('Error inserting room:', err);
-    res.status(500).json({ error: 'Failed to add room.' });
-  } else {
-    // Fetch the newly added room from the database
-    const newRoom = {
-      RoomID: results.insertId, // Get the ID of the newly added room
-      RoomName,
-      RoomCenter,
-      DetailRoom,
-      Image: image
-    };
-    res.status(200).json(newRoom); // Return the new room data
-  }
-});
+  pool.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error inserting room:', err);
+      res.status(500).json({ error: 'Failed to add room.' });
+    } else {
+      // Fetch the newly added room from the database
+      const newRoom = {
+        RoomID: results.insertId, // Get the ID of the newly added room
+        RoomName,
+        RoomCenter,
+        DetailRoom,
+        Image: image
+      };
+      res.status(200).json(newRoom); // Return the new room data
+    }
+  });
 });
 
 
@@ -407,7 +407,7 @@ app.put('/api/edit-room/:id', upload.single('Image'), (req, res) => {
 // API endpoint for deleting a room
 app.delete('/api/delete-room/:id', (req, res) => {
   const { id } = req.params;
-  
+
   const deleteRoomQuery = 'DELETE FROM listroom WHERE RoomID = ?';
   pool.query(deleteRoomQuery, [id], (error, results) => {
     if (error) {
@@ -490,10 +490,10 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
 
 // Route to create a new booking แบบ วันทั้งเดือน
 app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
-  const { RoomID, DayOfWeek, StartTime, EndTime, Name, Phone, Reason } = req.body;
+  const { RoomID, DayOfWeek, StartTime, EndTime, Name, Phone, Reason, StartMonth, EndMonth } = req.body;
   const userID = req.user.username;
 
-  if (!RoomID || !DayOfWeek || !StartTime || !EndTime || !Name || !Phone || !Reason) {
+  if (!RoomID || !DayOfWeek || !StartTime || !EndTime || !Name || !Phone || !Reason || !StartMonth || !EndMonth) {
     return res.status(400).send('Missing required fields');
   }
 
@@ -503,48 +503,73 @@ app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
     return new Date(date.getTime() + offset);
   };
 
-  // คำนวณวันทั้งหมดของวันที่เลือกในเดือนปัจจุบัน
+  // วันนี้ (ปัจจุบัน)
   const today = new Date();
-  const startDate = toThaiTime(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
-  const endDate = toThaiTime(new Date(today.getFullYear(), today.getMonth() + 1, 0));
-  const dayMap = { Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
 
+  // เปลี่ยน StartMonth และ EndMonth เป็นวันที่ (ถ้าเลือกเดือนอื่น)
+  const startMonth = new Date(StartMonth); // StartMonth คือ string ที่ส่งมาเป็น 'YYYY-MM'
+  const endMonth = new Date(EndMonth); // EndMonth คือ string ที่ส่งมาเป็น 'YYYY-MM'
+
+  // ตรวจสอบว่า StartMonth และ EndMonth เป็นวันที่ที่ถูกต้อง
+  if (isNaN(startMonth) || isNaN(endMonth)) {
+    return res.status(400).send('Invalid month format');
+  }
+
+  // กำหนดช่วงวันที่เริ่มต้นและสิ้นสุด
+  const startDate = toThaiTime(new Date(startMonth.getFullYear(), startMonth.getMonth(), 1)); // วันที่เริ่มต้นของเดือน
+  const endDate = toThaiTime(new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0)); // วันที่สิ้นสุดของเดือน
+
+  const dayMap = { Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
   const selectedDay = dayMap[DayOfWeek];
   const bookings = [];
 
+  // สร้างรายการจองสำหรับวันในเดือนที่เลือก
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const currentDate = new Date(d);
+
+    // ตรวจสอบว่าเป็นวันที่ผ่านมาแล้วหรือไม่
+    if (currentDate < today) {
+      continue;  // ถ้าเป็นวันที่ผ่านมาแล้ว ให้ข้าม
+    }
+
     if (currentDate.getDay() === selectedDay) {
-      const formattedDate = toThaiTime(currentDate).toISOString().split('T')[0];
-      bookings.push([RoomID, formattedDate, formattedDate, StartTime, EndTime, 'wait', Name, Phone, Reason]);
+      bookings.push([
+        RoomID,
+        currentDate.toISOString().split('T')[0], // StartDate
+        currentDate.toISOString().split('T')[0], // EndDate
+        StartTime,
+        EndTime,
+        'wait',
+        Name,
+        Phone,
+        Reason,
+      ]);
     }
   }
 
   if (bookings.length === 0) {
-    return res.status(400).send(`ไม่มีวัน ${DayOfWeek} ให้จองในเดือนนี้`);
+    return res.status(400).send(`ไม่มีวัน ${DayOfWeek} ให้จองในเดือนที่เลือก`);
   }
 
-  // ตรวจสอบว่ามีการจองที่ทับซ้อนหรือไม่
+  // ตรวจสอบการจองที่ซ้อนทับ
   const checkOverlapQuery = `
-    SELECT * FROM orderbooking
-    WHERE RoomID = ? AND Status != 'reject' AND (
-      (StartDate = ? AND Start < ? AND End > ?) OR  
-      (StartDate = ? AND Start < ? AND End > ?) OR  
-      (StartDate BETWEEN ? AND ? AND Start < ? AND End > ?)
-    )
+  SELECT * FROM orderbooking
+  WHERE RoomID = ? 
+    AND StartDate = ? 
+    AND Status != 'reject' 
+    AND NOT (End <= ? OR Start >= ?)
   `;
 
-  const overlapPromises = bookings.map(([roomId, startDate]) => {
+  const overlapPromises = bookings.map(([roomId, startDate, , startTime, endTime]) => {
     return new Promise((resolve, reject) => {
       pool.query(checkOverlapQuery, [
         roomId,
-        startDate, StartTime, EndTime,  // First condition
-        startDate, EndTime, StartTime,  // Second condition
-        startDate, startDate, StartTime, EndTime // Third condition (range check)
+        startDate,
+        startTime, // สิ้นสุดของช่วงเวลาที่จะจอง
+        endTime,   // เริ่มต้นของช่วงเวลาที่จะจอง
       ], (error, results) => {
         if (error) return reject(error);
-        if (results.length > 0) return resolve(true); // มีการจองที่ทับซ้อน
-        return resolve(false);
+        return resolve(results.length > 0); // ถ้าซ้ำซ้อน return true
       });
     });
   });
@@ -555,7 +580,7 @@ app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
         return res.status(400).send('ไม่สามารถจองในบางวันได้เนื่องจากมีการจองซ้ำ');
       }
 
-      // ถ้าไม่มีการจองทับซ้อน -> ทำการบันทึก
+      // ถ้าไม่มีการจองซ้อน ให้เพิ่มการจอง
       const insertBookingQuery = `
         INSERT INTO orderbooking (RoomID, StartDate, EndDate, Start, End, Status, Name, Phone, Reason)
         VALUES ?
@@ -567,10 +592,10 @@ app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
           return res.status(500).json({ error: 'Error creating weekly bookings', details: error });
         }
 
-        const orderBookingIDs = result.insertId;
+        const firstInsertedID = result.insertId; // ID ของรายการแรก
         const userListOrderEntries = bookings.map((_, index) => [
           userID,
-          orderBookingIDs + index,
+          firstInsertedID + index, // ID ของแต่ละรายการ
         ]);
 
         const userListOrderQuery = `
@@ -591,6 +616,10 @@ app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
       return res.status(500).json({ error: 'Error checking overlapping bookings', details: error });
     });
 });
+
+
+
+
 
 
 

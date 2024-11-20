@@ -68,15 +68,16 @@ const BookingPage = () => {
         });
         toast.success(response.data);
       } else if (bookingType === 'weekly') {
-        // การจองแบบรายสัปดาห์
-        if (!dayOfWeek) {
-          toast.error('กรุณาเลือกวันที่ในสัปดาห์');
+        if (!dayOfWeek || !startDate || !endDate) {
+          toast.error('กรุณากรอกข้อมูลวันและช่วงเดือน');
           return;
         }
 
         const response = await axios.post('/api/bookings/weekly', {
           RoomID: selectedRoomID,
           DayOfWeek: dayOfWeek,
+          StartMonth: startDate,
+          EndMonth: endDate,
           StartTime: startTime,
           EndTime: endTime,
           Name: name,
@@ -87,6 +88,7 @@ const BookingPage = () => {
         });
         toast.success(response.data);
       }
+
 
       // รีเซ็ตฟอร์ม
       setStartDate('');
@@ -126,53 +128,81 @@ const BookingPage = () => {
           {bookingType === 'range' && (
             <>
               <div className='row'>
-              <div className="form-group mb-3 col-lg-6 col-12">
-                <label htmlFor="startDate">วันที่เริ่ม:</label>
-                <input
-                  id="startDate"
-                  type="date"
-                  className="form-control"
-                  value={startDate}
-                  min={new Date().toISOString().split('T')[0]} // วันที่ปัจจุบัน
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-              <div className="form-group mb-3 col-lg-6 col-12">
-                <label htmlFor="endDate">วันที่สิ้นสุด:</label>
-                <input
-                  id="endDate"
-                  type="date"
-                  className="form-control"
-                  value={endDate}
-                  min={startDate || new Date().toISOString().split('T')[0]} // ต้องไม่น้อยกว่าวันเริ่มต้น
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
+                <div className="form-group mb-3 col-lg-6 col-12">
+                  <label htmlFor="startDate">วันที่เริ่ม:</label>
+                  <input
+                    id="startDate"
+                    type="date"
+                    className="form-control"
+                    value={startDate}
+                    min={new Date().toISOString().split('T')[0]} // วันที่ปัจจุบัน
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="form-group mb-3 col-lg-6 col-12">
+                  <label htmlFor="endDate">วันที่สิ้นสุด:</label>
+                  <input
+                    id="endDate"
+                    type="date"
+                    className="form-control"
+                    value={endDate}
+                    min={startDate || new Date().toISOString().split('T')[0]} // ต้องไม่น้อยกว่าวันเริ่มต้น
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
               </div>
             </>
           )}
 
-
+          
           {bookingType === 'weekly' && (
-            <div className="form-group mb-3">
-              <label htmlFor="dayOfWeek">เลือกวันในสัปดาห์:</label>
-              <select
-                id="dayOfWeek"
-                className="form-control"
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(e.target.value)}
-              >
-                <option value="">-- กรุณาเลือก --</option>
-                <option value="Monday">วันจันทร์</option>
-                <option value="Tuesday">วันอังคาร</option>
-                <option value="Wednesday">วันพุธ</option>
-                <option value="Thursday">วันพฤหัสบดี</option>
-                <option value="Friday">วันศุกร์</option>
-                <option value="Saturday">วันเสาร์</option>
-                <option value="Sunday">วันอาทิตย์</option>
-              </select>
-            </div>
+            <>
+              <div className="form-group mb-3">
+                <label htmlFor="dayOfWeek">เลือกวันในสัปดาห์:</label>
+                <select
+                  id="dayOfWeek"
+                  className="form-control"
+                  value={dayOfWeek}
+                  onChange={(e) => setDayOfWeek(e.target.value)}
+                >
+                  <option value="">-- กรุณาเลือก --</option>
+                  <option value="Monday">วันจันทร์</option>
+                  <option value="Tuesday">วันอังคาร</option>
+                  <option value="Wednesday">วันพุธ</option>
+                  <option value="Thursday">วันพฤหัสบดี</option>
+                  <option value="Friday">วันศุกร์</option>
+                  <option value="Saturday">วันเสาร์</option>
+                  <option value="Sunday">วันอาทิตย์</option>
+                </select>
+              </div>
+
+              <div className="row">
+                <div className="form-group mb-3 col-lg-6 col-12">
+                  <label htmlFor="startMonth">เดือนเริ่มต้น:</label>
+                  <input
+                    id="startMonth"
+                    type="month"
+                    className="form-control"
+                    value={startDate}
+                    min={new Date().toISOString().slice(0, 7)} // กำหนด min เป็นเดือนปัจจุบัน
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="form-group mb-3 col-lg-6 col-12">
+                  <label htmlFor="endMonth">เดือนสิ้นสุด:</label>
+                  <input
+                    id="endMonth"
+                    type="month"
+                    className="form-control"
+                    value={endDate}
+                    min={startDate || new Date().toISOString().slice(0, 7)} // กำหนด min ให้มากกว่าหรือเท่ากับเดือนเริ่มต้น
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
+            </>
           )}
+
 
           <div className="row">
             <div className="form-group mb-3 col-lg-6 col-12">
