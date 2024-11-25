@@ -17,6 +17,7 @@ const SECRET_KEY = 'your_jwt_secret'; // Ensure consistency
 app.use(cors());
 app.use(express.json());
 app.use('/images', express.static('public/images'));
+app.use('/imagesrooms', express.static(path.join(__dirname, 'public/imagesrooms')));
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -323,7 +324,7 @@ app.get('/api/rooms/:id', (req, res) => {
 // Set up storage and file filter for multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/imagesrooms/'); // Save uploaded images in 'public/images' directory
+    cb(null, 'public/imagesrooms/'); // Save uploaded images in 'public/imagesrooms' directory
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
@@ -357,6 +358,7 @@ app.post('/api/add-room', upload.single('Image'), (req, res) => {
     }
   });
 });
+
 
 
 // Get all rooms
