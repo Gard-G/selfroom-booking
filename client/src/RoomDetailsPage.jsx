@@ -62,7 +62,7 @@ const RoomDetailsPage = () => {
                   {/* Show room image */}
                   {room.Image && (
                     <img
-                      src={`http://localhost:5000/imagesrooms/${room.Image}`} // Correctly use the image URL
+                      src={`https://selfroom.rmutp.ac.th/imagesrooms/${room.Image}`} // Correctly use the image URL
                       alt={room.RoomName}
                       className="img-fluid mb-3"
                       style={{ width: '230px', height: '160px', objectFit: 'cover' }}
