@@ -4,10 +4,14 @@ import { useLocation } from 'react-router-dom';
 import Navbar from './components/nevbar';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ReactFlatpickr from 'react-flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import { Thai } from 'flatpickr/dist/l10n/th.js'; // นำเข้า locale ภาษาไทย
+import moment from 'moment-timezone';  // เพิ่มการนำเข้า moment-timezone
 
 const BookingPage = () => {
   const [room, setRoom] = useState(null);
-  const [bookingType, setBookingType] = useState('range'); // ประเภทการจอง (range หรือ weekly)
+  const [bookingType, setBookingType] = useState('range');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [dayOfWeek, setDayOfWeek] = useState('');
@@ -27,6 +31,18 @@ const BookingPage = () => {
       .catch(error => console.error('Error fetching room details:', error));
   }, [selectedRoomID]);
 
+  // ฟังก์ชันแปลงวันที่ให้เป็นเวลาไทย
+  const convertToThaiDate = (date) => {
+    return moment(date).tz('Asia/Bangkok').format('YYYY-MM-DD'); // แปลงเป็นเวลาไทย
+  };
+
+  // ฟังก์ชันแปลงเวลาให้เป็นรูปแบบ HH:mm
+  const formatTime = (date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -44,7 +60,6 @@ const BookingPage = () => {
 
     try {
       if (bookingType === 'range') {
-        // การจองแบบช่วงวันที่
         if (!startDate || !endDate) {
           toast.error('กรุณากรอกวันที่เริ่มและวันที่สิ้นสุด');
           return;
@@ -89,8 +104,7 @@ const BookingPage = () => {
         toast.success(response.data);
       }
 
-
-      // รีเซ็ตฟอร์ม
+      // Clear form after successful submission
       setStartDate('');
       setEndDate('');
       setDayOfWeek('');
@@ -130,31 +144,34 @@ const BookingPage = () => {
               <div className='row'>
                 <div className="form-group mb-3 col-lg-6 col-12">
                   <label htmlFor="startDate">วันที่เริ่ม:</label>
-                  <input
+                  <ReactFlatpickr
                     id="startDate"
-                    type="date"
-                    className="form-control"
                     value={startDate}
-                    min={new Date().toISOString().split('T')[0]} // วันที่ปัจจุบัน
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={([date]) => setStartDate(convertToThaiDate(date))} // แปลงวันที่เป็นเวลาไทย
+                    options={{
+                      locale: Thai,
+                      dateFormat: "Y-m-d",
+                    }}
+                    className="form-control"
                   />
                 </div>
                 <div className="form-group mb-3 col-lg-6 col-12">
                   <label htmlFor="endDate">วันที่สิ้นสุด:</label>
-                  <input
+                  <ReactFlatpickr
                     id="endDate"
-                    type="date"
-                    className="form-control"
                     value={endDate}
-                    min={startDate || new Date().toISOString().split('T')[0]} // ต้องไม่น้อยกว่าวันเริ่มต้น
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={([date]) => setEndDate(convertToThaiDate(date))} // แปลงวันที่เป็นเวลาไทย
+                    options={{
+                      locale: Thai,
+                      dateFormat: "Y-m-d",
+                    }}
+                    className="form-control"
                   />
                 </div>
               </div>
             </>
           )}
 
-          
           {bookingType === 'weekly' && (
             <>
               <div className="form-group mb-3">
@@ -184,7 +201,7 @@ const BookingPage = () => {
                     type="month"
                     className="form-control"
                     value={startDate}
-                    min={new Date().toISOString().slice(0, 7)} // กำหนด min เป็นเดือนปัจจุบัน
+                    min={new Date().toISOString().slice(0, 7)}
                     onChange={(e) => setStartDate(e.target.value)}
                   />
                 </div>
@@ -195,7 +212,7 @@ const BookingPage = () => {
                     type="month"
                     className="form-control"
                     value={endDate}
-                    min={startDate || new Date().toISOString().slice(0, 7)} // กำหนด min ให้มากกว่าหรือเท่ากับเดือนเริ่มต้น
+                    min={startDate || new Date().toISOString().slice(0, 7)}
                     onChange={(e) => setEndDate(e.target.value)}
                   />
                 </div>
@@ -203,26 +220,35 @@ const BookingPage = () => {
             </>
           )}
 
-
           <div className="row">
             <div className="form-group mb-3 col-lg-6 col-12">
               <label htmlFor="startTime">เวลาเริ่ม:</label>
-              <input
+              <ReactFlatpickr
                 id="startTime"
-                type="time"
-                className="form-control"
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={([date]) => setStartTime(formatTime(date))}
+                options={{
+                  enableTime: true,
+                  noCalendar: true,
+                  dateFormat: "H:i",
+                  time_24hr: true,
+                }}
+                className="form-control"
               />
             </div>
             <div className="form-group mb-3 col-lg-6 col-12">
               <label htmlFor="endTime">จนถึง:</label>
-              <input
+              <ReactFlatpickr
                 id="endTime"
-                type="time"
-                className="form-control"
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={([date]) => setEndTime(formatTime(date))}
+                options={{
+                  enableTime: true,
+                  noCalendar: true,
+                  dateFormat: "H:i",
+                  time_24hr: true,
+                }}
+                className="form-control"
               />
             </div>
           </div>
