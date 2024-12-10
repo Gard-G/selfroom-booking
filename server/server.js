@@ -437,22 +437,21 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     return res.status(400).send('Missing required fields');
   }
 
-  // ตรวจสอบการจองที่ทับซ้อนกัน
-  const checkOverlapQuery = `
-    SELECT * FROM orderbooking
-    WHERE RoomID = ? AND Status != 'reject' AND (
-      (StartDate = ? AND Start < ? AND End > ?) OR  
-      (StartDate = ? AND Start < ? AND End > ?) OR  
-      (StartDate BETWEEN ? AND ? AND Start < ? AND End > ?)  
-    )
-  `;
+// ตรวจสอบการจองที่ทับซ้อนกัน
+const checkOverlapQuery = `
+  SELECT * FROM orderbooking
+  WHERE RoomID = ? AND Status != 'reject' AND (
+    (StartDate BETWEEN ? AND ? AND Start BETWEEN ? AND ?) OR
+    (EndDate = ? AND Start BETWEEN ? AND ?)   -- วันที่สิ้นสุดของจองแรกตรงกับวันที่เริ่มต้นของจองใหม่
 
-  pool.query(checkOverlapQuery, [
-    RoomID,
-    StartDate, StartTime, EndTime,   // For the first condition
-    StartDate, EndTime, StartTime,    // For the second condition
-    StartDate, EndDate,               // For the third condition (date range)
-    StartTime, EndTime                // Start and End times for overlap check
+  )
+`;
+
+pool.query(checkOverlapQuery, [
+  RoomID,
+  StartDate, EndDate,StartTime , EndTime,  
+  StartDate, StartTime , EndTime // วันที่สิ้นสุดของจองแรกตรงกับวันที่เริ่มต้นของจองใหม่
+
   ], (error, results) => {
     if (error) {
       console.error('Error checking for overlapping bookings:', error);
