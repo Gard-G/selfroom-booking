@@ -8,6 +8,10 @@ import ReactFlatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import { Thai } from 'flatpickr/dist/l10n/th.js'; // นำเข้า locale ภาษาไทย
 import moment from 'moment-timezone';  // เพิ่มการนำเข้า moment-timezone
+import monthSelectPlugin from "flatpickr/dist/plugins/monthSelect/index";
+import "flatpickr/dist/plugins/monthSelect/style.css"; // สไตล์ของ Month Select
+
+
 
 const BookingPage = () => {
   const [room, setRoom] = useState(null);
@@ -24,6 +28,7 @@ const BookingPage = () => {
 
   const queryParams = new URLSearchParams(location.search);
   const selectedRoomID = queryParams.get('room');
+  const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);  // วันที่เริ่มต้นของเดือนปัจจุบัน
 
   useEffect(() => {
     axios.get(`/api/rooms/${selectedRoomID}`)
@@ -151,6 +156,7 @@ const BookingPage = () => {
                     options={{
                       locale: Thai,
                       dateFormat: "Y-m-d",
+                      minDate: new Date(), // ไม่อนุญาตให้จองย้อนหลัง
                     }}
                     className="form-control"
                   />
@@ -164,6 +170,7 @@ const BookingPage = () => {
                     options={{
                       locale: Thai,
                       dateFormat: "Y-m-d",
+                      minDate: startDate || new Date(), // ไม่อนุญาตให้สิ้นสุดก่อนวันที่เริ่ม
                     }}
                     className="form-control"
                   />
@@ -196,26 +203,48 @@ const BookingPage = () => {
               <div className="row">
                 <div className="form-group mb-3 col-lg-6 col-12">
                   <label htmlFor="startMonth">เดือนเริ่มต้น:</label>
-                  <input
+                  <ReactFlatpickr
                     id="startMonth"
-                    type="month"
-                    className="form-control"
                     value={startDate}
-                    min={new Date().toISOString().slice(0, 7)}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={([date]) => setStartDate(convertToThaiDate(date))}
+                    options={{
+                      locale: Thai, // ใช้ภาษาไทย
+                      dateFormat: "Y-m", // แสดงปี-เดือน
+                      minDate: currentMonthStart, // เริ่มต้นที่วันแรกของเดือนปัจจุบัน
+                      plugins: [
+                        new monthSelectPlugin({
+                          shorthand: true, // แสดงชื่อเดือนย่อ
+                          dateFormat: "Y-m", // กำหนดรูปแบบเป็น ปี-เดือน
+                          altFormat: "F Y", // รูปแบบแสดงผลทางเลือก
+                        }),
+                      ],
+                    }}
+                    className="form-control"
                   />
                 </div>
+
                 <div className="form-group mb-3 col-lg-6 col-12">
                   <label htmlFor="endMonth">เดือนสิ้นสุด:</label>
-                  <input
+                  <ReactFlatpickr
                     id="endMonth"
-                    type="month"
-                    className="form-control"
                     value={endDate}
-                    min={startDate || new Date().toISOString().slice(0, 7)}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={([date]) => setEndDate(convertToThaiDate(date))}
+                    options={{
+                      locale: Thai, // ใช้ภาษาไทย
+                      dateFormat: "Y-m", // แสดงปี-เดือน
+                      minDate: startDate || currentMonthStart, // เริ่มต้นที่วันแรกของเดือนปัจจุบัน
+                      plugins: [
+                        new monthSelectPlugin({
+                          shorthand: true, // แสดงชื่อเดือนย่อ
+                          dateFormat: "Y-m", // กำหนดรูปแบบเป็น ปี-เดือน
+                          altFormat: "F Y", // รูปแบบแสดงผลทางเลือก
+                        }),
+                      ],
+                    }}
+                    className="form-control"
                   />
                 </div>
+
               </div>
             </>
           )}
@@ -276,7 +305,7 @@ const BookingPage = () => {
           </div>
 
           <div className="form-group mb-4">
-            <label htmlFor="reason">ใช้ทำอะไร:</label>
+            <label htmlFor="reason">วัตถุประสงค์:</label>
             <textarea
               id="reason"
               className="form-control"
