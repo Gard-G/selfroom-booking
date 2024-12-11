@@ -9,6 +9,16 @@ const StatusOrderPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // เปลี่ยน place-items ของ body เมื่อเข้าไปในหน้า StatusOrderPage
+    document.body.style.placeItems = 'start'; // place-items: start; แทน top
+
+    // คืนค่าการตั้งค่าเดิมเมื่อออกจากหน้า
+    return () => {
+      document.body.style.placeItems = ''; // คืนค่ากลับเป็นค่าเดิม
+    };
+  }, []);
+
+  useEffect(() => {
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -65,7 +75,7 @@ const StatusOrderPage = () => {
     <div>
       <Navbar />
       <div className="container mt-5">
-        <h1>รายการจองของคุณ</h1>
+        <h1 >รายการจองของคุณ</h1>
         {error && <div className="alert alert-danger">{error}</div>}
         {orders.length === 0 ? (
           <p>No orders found.</p>
@@ -79,8 +89,9 @@ const StatusOrderPage = () => {
                 <th>วันที่สิ้นสุด</th> {/* เพิ่ม EndDate */}
                 <th>เวลาเริ่ม</th>
                 <th>ถึงเวลา</th>
+                <th>วัตถุประสงค์/เหตุผลที่ปฏิเสธ</th>
                 <th>สถานะ</th>
-                <th>Action</th> {/* New column for actions */}
+                <th></th> {/* New column for actions */}
               </tr>
             </thead>
             <tbody className='table-info'>
@@ -100,13 +111,14 @@ const StatusOrderPage = () => {
                   })}</td> {/* แสดง EndDate */}
                   <td>{new Date(`1970-01-01T${order.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</td> {/* แสดง Start */}
                   <td>{new Date(`1970-01-01T${order.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</td> {/* แสดง End */}
+                  <td>{order.Reason}</td>
                   <td>{order.Status}</td>
                   <td>
                     <button
                       className="btn btn-danger"
                       onClick={() => handleDelete(order.OrderBooking)}
                     >
-                      ลบ
+                      ยกเลิกการจอง
                     </button>
                   </td>
                 </tr>

@@ -98,11 +98,12 @@ app.get('/api/user-orders', authenticateToken, (req, res) => {
   const userID = req.user.username; // Adjust if needed
 
   const query = `
-    SELECT ob.OrderBooking, ob.Name, ob.StartDate, ob.EndDate, ob.Start, ob.End, ob.Status, lr.RoomName
+    SELECT ob.OrderBooking, ob.Name, ob.StartDate, ob.EndDate, ob.Start, ob.End, ob.Status, ob.Reason, lr.RoomName
     FROM orderbooking ob
     JOIN userlistorder ulo ON ob.OrderBooking = ulo.OrderBooking
     JOIN listroom lr ON ob.RoomID = lr.RoomID
     WHERE ulo.UserID = ?
+    ORDER BY ob.OrderBooking DESC
   `;
 
   pool.query(query, [userID], (error, results) => {
