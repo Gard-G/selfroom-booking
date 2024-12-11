@@ -556,18 +556,19 @@ app.post('/api/bookings/weekly', authenticateToken, (req, res) => {
   const checkOverlapQuery = `
   SELECT * FROM orderbooking
   WHERE RoomID = ? 
-    AND StartDate = ? 
-    AND Status != 'reject' 
-    AND NOT (End <= ? OR Start >= ?)
-  `;
+    AND (
+    (StartDate BETWEEN ? AND ? AND Start BETWEEN ? AND ?) OR
+    (EndDate = ? AND Start BETWEEN ? AND ?)   -- วันที่สิ้นสุดของจองแรกตรงกับวันที่เริ่มต้นของจองใหม่
 
-  const overlapPromises = bookings.map(([roomId, startDate, , startTime, endTime]) => {
+  )
+`;
+
+  const overlapPromises = bookings.map(([roomId, startDate, endDate , startTime, endTime]) => {
     return new Promise((resolve, reject) => {
       pool.query(checkOverlapQuery, [
         roomId,
-        startDate,
-        startTime, // สิ้นสุดของช่วงเวลาที่จะจอง
-        endTime,   // เริ่มต้นของช่วงเวลาที่จะจอง
+        startDate, endDate, startTime , endTime,  
+        startDate, startTime , endTime // วันที่สิ้นสุดของจองแรกตรงกับวันที่เริ่มต้นของจองใหม่
       ], (error, results) => {
         if (error) return reject(error);
         return resolve(results.length > 0); // ถ้าซ้ำซ้อน return true
