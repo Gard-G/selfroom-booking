@@ -297,7 +297,7 @@ const BookingPage = () => {
             <label htmlFor="phone">เบอร์โทร:</label>
             <input
               id="phone"
-              type="text"
+              type="number"
               className="form-control"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

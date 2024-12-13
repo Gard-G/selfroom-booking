@@ -90,14 +90,14 @@ const AdminManagementPage = () => {
       <Navbar />
       <ToastContainer />
       <div className="card bg-dark text-white rounded">
-        <h2 className="card-title mb-4 text-center">จัดการแอดมิน</h2>
+        <h2 className="card-title mb-4 text-center">จัดการผู้ดูแล</h2>
         <div className="card-body">
           <div className="row">
             {/* Add Admin Section */}
             <div className="col-md-6">
               <div className="card bg-secondary  rounded ">
                 <div className="card-body">
-                  <h4 className="card-title">เพิ่มแอดมิน</h4>
+                  <h4 className="card-title">เพิ่มผู้ดูแล</h4>
                   <div className="form-group">
                     <input
                       type="text"
@@ -112,7 +112,7 @@ const AdminManagementPage = () => {
                     onClick={handleAddAdmin}
                     disabled={loading}
                   >
-                    {loading ? 'Adding...' : 'เพิ่มแอดมิน'}
+                    {loading ? 'Adding...' : 'เพิ่มผู้ดูแล'}
                   </button>
                 </div>
               </div>
@@ -122,7 +122,7 @@ const AdminManagementPage = () => {
             <div className="col-md-6">
               <div className="card bg-secondary rounded">
                 <div className="card-body">
-                  <h4 className="card-title">แอดมินลิส</h4>
+                  <h4 className="card-title">รายชื่อผู้ดูแล</h4>
                   {loading ? (
                     <div className="text-center">
                       <div className="spinner-border text-light" role="status">

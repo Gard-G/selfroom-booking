@@ -73,48 +73,70 @@ const RoomDetailsPage = () => {
 
                   {/* Toggle button for booking details */}
                   {room.bookings && room.bookings.length > 0 ? (
-                    <div>
-                      <button
-                        className="btn btn-secondary mb-3"
-                        onClick={() => toggleBookingDetails(room.RoomID)}
-                      >
-                        {expandedRoomIDs.has(room.RoomID) ? 'วันเวลาที่มีคนกำลังจอง:' : 'วันเวลาที่มีคนกำลังจอง:'}
-                      </button>
+  <div>
+    <button
+      className="btn btn-secondary mb-3"
+      onClick={() => toggleBookingDetails(room.RoomID)}
+    >
+      {expandedRoomIDs.has(room.RoomID) ? 'ซ่อนวันเวลาที่มีการจอง' : 'ดูวันเวลาที่มีการจอง'}
+    </button>
 
-                      {expandedRoomIDs.has(room.RoomID) && (
-                        <div>
-                          <ul className="list-unstyled">
-                            {room.bookings.map((booking, index) => (
-                              <li key={index} className="mb-2">
-                                <span className="d-block">
-                                  <strong>วันที่เริ่ม:</strong> {new Date(booking.StartDate).toLocaleDateString('th-TH', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                  })}
-                                </span>
-                                <span className="d-block">
-                                  <strong>วันที่สิ้นสุด:</strong> {new Date(booking.EndDate).toLocaleDateString('th-TH', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                  })}
-                                </span>
-                                <span className="d-block">
-                                  <strong>เวลาเริ่ม:</strong> {new Date(`1970-01-01T${booking.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.')}
-                                </span>
-                                <span className="d-block">
-                                  <strong>จนถึง:</strong> {new Date(`1970-01-01T${booking.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.')}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <h6>ยังไม่มีการจองสำหรับห้องนี้</h6>
-                  )}
+    {expandedRoomIDs.has(room.RoomID) && (
+      <div>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>วันที่เริ่ม</th>
+              <th>วันที่สิ้นสุด</th>
+              <th>เวลาเริ่ม</th>
+              <th>ถึงเวลา</th>
+            </tr>
+          </thead>
+          <tbody>
+          {room.bookings
+              .slice() // Clone the array to avoid mutating the original data
+              .sort((a, b) => new Date(a.StartDate) - new Date(b.StartDate)) // Sort by StartDate
+              .map((booking, index) => (
+              <tr key={index}>
+                <td>
+                  {new Date(booking.StartDate).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </td>
+                <td>
+                  {new Date(booking.EndDate).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </td>
+                <td>
+                  {new Date(`1970-01-01T${booking.Start}`).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: false 
+                  }).replace(':', '.')}
+                </td>
+                <td>
+                  {new Date(`1970-01-01T${booking.End}`).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: false 
+                  }).replace(':', '.')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+) : (
+  <h6>ยังไม่มีการจองสำหรับห้องนี้</h6>
+)}
+
 
                   <button
                     className="btn btn-primary mt-3"
