@@ -58,7 +58,7 @@ function Navbar() {
                   <a className="nav-link" href="/add-rooms">เพิ่มห้อง</a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="/Admin-manage">จัดการแอดมิน</a>
+                  <a className="nav-link" href="/Admin-manage">จัดการผู้ดูแล</a>
                 </li>
                 
               </>
