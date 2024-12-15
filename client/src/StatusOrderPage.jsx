@@ -76,7 +76,7 @@ const StatusOrderPage = () => {
       <Navbar />
       <div className="container mt-5">
         <h1 >รายการจองของคุณ</h1>
-        <h5>*จะอนุมัติหรือปฏิเสธการจองภายใน 1 วันทำการ</h5>
+        <h5>จะอนุมัติหรือปฏิเสธการจองภายใน 1 วันทำการ</h5>
         {error && <div className="alert alert-danger">{error}</div>}
         {orders.length === 0 ? (
           <p>No orders found.</p>
