@@ -229,7 +229,7 @@ const AddRoomPage = () => {
               />
             </div>
             <button type="submit" className="btn btn-outline-success btn-block">
-              {editRoomId ? 'Update Room' : 'Add Room'}
+              {editRoomId ? 'แก้ไขห้อง' : 'เพิ่มห้อง'}
             </button>
           </form>
         </div>
@@ -243,7 +243,7 @@ const AddRoomPage = () => {
               <th>ชื่อห้อง</th>
               <th>ศูนย์</th>
               <th>รายละเอียดห้อง</th>
-              <th>Action</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -257,13 +257,13 @@ const AddRoomPage = () => {
                     className="btn btn-primary me-2"
                     onClick={() => handleEditRoom(room)}
                   >
-                    Edit
+                    แก้ไข
                   </button>
                   <button
                     className="btn btn-danger"
                     onClick={() => handleDeleteRoom(room.RoomID)}
                   >
-                    Delete
+                    ลบ
                   </button>
                 </td>
               </tr>

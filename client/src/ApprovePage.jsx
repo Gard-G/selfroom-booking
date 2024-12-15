@@ -5,7 +5,20 @@ import Navbar from './components/nevbar';
 
 const ApprovePage = () => {
   const [bookings, setBookings] = useState([]);
+  const [reason, setReason] = useState('');
+  const [currentBooking, setCurrentBooking] = useState(null); // เก็บข้อมูลการจองที่กำลังจะถูกปฏิเสธ
+  const [showModal, setShowModal] = useState(false); // ควบคุมการแสดง modal
   const navigate = useNavigate();
+
+  useEffect(() => {
+      // เปลี่ยน place-items ของ body เมื่อเข้าไปในหน้า StatusOrderPage
+      document.body.style.placeItems = 'start'; // place-items: start; แทน top
+  
+      // คืนค่าการตั้งค่าเดิมเมื่อออกจากหน้า
+      return () => {
+        document.body.style.placeItems = ''; // คืนค่ากลับเป็นค่าเดิม
+      };
+    }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -41,14 +54,28 @@ const ApprovePage = () => {
     });
   }, [navigate]);
 
-  const handleUpdateStatus = (OrderBooking, newStatus) => {
-    axios.put('/api/update-booking-status', { OrderBooking, newStatus })
+  const handleUpdateStatus = (OrderBooking, newStatus, reason) => {
+    axios.put('/api/update-booking-status', { OrderBooking, newStatus, reason })
       .then(response => {
         setBookings(bookings.filter(booking => booking.OrderBooking !== OrderBooking));
+        setShowModal(false);
+        setReason('');
+        setCurrentBooking(null);
       })
       .catch(error => {
         console.error('Error updating booking status:', error);
       });
+  };
+
+  const openRejectModal = (booking) => {
+    setCurrentBooking(booking);
+    setShowModal(true);
+  };
+
+  const closeRejectModal = () => {
+    setShowModal(false);
+    setReason('');
+    setCurrentBooking(null);
   };
 
   return (
@@ -67,8 +94,8 @@ const ApprovePage = () => {
                 <th>เวลาเริ่ม</th>
                 <th>ถึงเวลา</th>
                 <th>เบอร์โทร</th>
-                <th>ใช้ทำอะไร</th>
-                <th>Actions</th>
+                <th>วัตถุประสงค์</th>
+                <th></th>
               </tr>
             </thead>
             <tbody className='table-info'>
@@ -86,8 +113,8 @@ const ApprovePage = () => {
                     year: 'numeric',
                   })}</td>
                   <td>{booking.RoomName}</td>
-                  <td>{new Date(`1970-01-01T${booking.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(":", ".")}</td> {/* แสดง StartTime */}
-                  <td>{new Date(`1970-01-01T${booking.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(":", ".")}</td> {/* แสดง EndTime */}
+                  <td>{new Date(`1970-01-01T${booking.Start}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(":", ".")}</td>
+                  <td>{new Date(`1970-01-01T${booking.End}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(":", ".")}</td>
                   <td>{booking.Phone}</td>
                   <td>{booking.Reason}</td>
                   <td>
@@ -98,7 +125,7 @@ const ApprovePage = () => {
                       อนุมัติ
                     </button>
                     <button 
-                      onClick={() => handleUpdateStatus(booking.OrderBooking, 'reject')}
+                      onClick={() => openRejectModal(booking)}
                       className="btn btn-danger"
                     >
                       ปฏิเสธ
@@ -110,6 +137,40 @@ const ApprovePage = () => {
           </table>
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="modal d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">ปฏิเสธการจอง</h5>
+                <button type="button" className="close" onClick={closeRejectModal}>&times;</button>
+              </div>
+              <div className="modal-body">
+                <p>กรุณาระบุเหตุผลในการปฏิเสธ:</p>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => handleUpdateStatus(currentBooking.OrderBooking, 'reject', reason)}
+                  disabled={!reason.trim()}
+                >
+                  ยืนยัน
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={closeRejectModal}>ยกเลิก</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

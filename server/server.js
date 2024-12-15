@@ -16,8 +16,8 @@ const SECRET_KEY = 'your_jwt_secret'; // Ensure consistency
 
 app.use(cors());
 app.use(express.json());
-app.use('/images', express.static('public/images'));
-app.use('/imagesrooms', express.static(path.join(__dirname, 'public/imagesrooms')));
+app.use('/imagesrooms', express.static('public/imagesrooms'));
+
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -171,19 +171,33 @@ app.get('/api/wait-bookings', (req, res) => {
 
 
 
-// Route to update booking status
+// Route to update booking status and reason
 app.put('/api/update-booking-status', (req, res) => {
-  const { OrderBooking, newStatus } = req.body;
+  const { OrderBooking, newStatus, reason } = req.body;
 
-  const query = 'UPDATE orderbooking SET Status = ? WHERE OrderBooking = ?';
-  pool.query(query, [newStatus, OrderBooking], (error, results) => {
+  let query;
+  let params;
+
+  if (reason) {
+    // หากต้องการอัปเดตทั้งสถานะและเหตุผล
+    query = 'UPDATE orderbooking SET Status = ?, Reason = ? WHERE OrderBooking = ?';
+    params = [newStatus, reason, OrderBooking];
+  } else {
+    // อัปเดตเฉพาะสถานะ
+    query = 'UPDATE orderbooking SET Status = ? WHERE OrderBooking = ?';
+    params = [newStatus, OrderBooking];
+  }
+
+  pool.query(query, params, (error, results) => {
     if (error) {
-      res.status(500).send('Error updating booking status');
+      console.error('Error updating booking status or reason:', error);
+      res.status(500).send('Error updating booking status or reason');
       return;
     }
-    res.status(200).send('Booking status updated successfully');
+    res.status(200).send('Booking status and/or reason updated successfully');
   });
 });
+
 
 // API endpoint to delete an order
 app.delete('/api/orders/:id', (req, res) => {

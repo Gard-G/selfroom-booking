@@ -79,6 +79,28 @@ function App() {
   const [selectedCenter, setSelectedCenter] = useState(null); // State to track the selected center for filtering
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
   const [selectedEvent, setSelectedEvent] = useState(null); // State to store the selected event
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+    } else {
+      setIsLoggedIn(true);
+      axios
+        .get('/api/user-info', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(response => {
+          setIsAdmin(response.data.IDstatus === 'admin');
+        })
+        .catch(error => {
+          console.error('Error verifying user:', error);
+        });
+    }
+  }, []);
 
   // Fetch events from the backend API on component mount
   useEffect(() => {
@@ -98,7 +120,7 @@ function App() {
             endDate.setHours(endTime[0], endTime[1]); // ตั้งค่าชั่วโมงและนาที
   
             return {
-              title: `${booking.RoomName} - ${booking.Name} - ${booking.Phone} - ${booking.Reason}`, // ชื่อเหตุการณ์
+              title: `${booking.RoomName} - ${booking.Reason}`, // ชื่อเหตุการณ์
               start: startDate,
               end: endDate,
               RoomCenter: booking.RoomCenter, // เก็บชื่อศูนย์ห้องสำหรับการกรอง
@@ -160,6 +182,21 @@ function App() {
     ? events.filter(event => event.RoomCenter === selectedCenter) // If a center is selected, filter events by that center
     : events; // Otherwise, show all events
 
+    const renderEventDetails = event => {
+      if (!isLoggedIn) {
+        return <p><strong></strong> </p>;
+      }
+      if (!isAdmin) {
+        return <p><strong></strong> </p>;
+      }
+      return (
+        <>
+          <p><strong>ชื่อ-นามสกุล:</strong> {event.Name}</p>
+          <p><strong>เบอร์โทร:</strong> {event.Phone}</p>
+        </>
+      );
+    };
+
   return (
     <div className="App">
       <Navbar /> {/* Navigation bar component */}
@@ -184,7 +221,7 @@ function App() {
               style={{background:'#2ecc71', fontSize:'14.5px', color:'black', cursor: 'pointer', marginRight: '7px'}}
               onClick={() => setSelectedCenter('ศูนย์พณิชยการพระนคร')} // Set selected center to 'ศูนย์พณิชยการพระนคร'
             >
-              พณิช
+              พณิชยการพระนคร
             </span>
 
             <span 
@@ -237,21 +274,25 @@ function App() {
     <Modal.Title>รายละเอียดการจอง</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    {selectedEvent && (
-      <div>
-        <div className="mb-3">
-          <div className="card p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
-            <p><strong>ชื่อห้อง:</strong> {selectedEvent.RoomName}</p>
-            <p><strong>ชื่อ-นามสกุล:</strong> {selectedEvent.Name}</p>
-            <p><strong>เบอร์โทร:</strong> {selectedEvent.Phone}</p>
-            <p><strong>ใช้ทำอะไร:</strong> {selectedEvent.Reason}</p>
-            <p><strong>วันที่:</strong> {moment(selectedEvent.start).format('DD/MM/YYYY')} - {moment(selectedEvent.end).format('DD/MM/YYYY')}</p>
-            <p><strong>เวลา:</strong> {moment(selectedEvent.start).format('HH:mm')} - {moment(selectedEvent.end).format('HH:mm')}</p>
-          </div>
-        </div>
-      </div>
-    )}
-  </Modal.Body>
+            {selectedEvent && (
+              <div>
+                {renderEventDetails(selectedEvent)}
+                <p><strong>ชื่อห้อง:</strong> {selectedEvent.RoomName}</p>
+                <p><strong>ใช้ทำอะไร:</strong> {selectedEvent.Reason}</p>
+                <p>
+                  <strong>วันที่:</strong>{' '}
+                  {moment(selectedEvent.start).format('DD/MM/YYYY')} -{' '}
+                  {moment(selectedEvent.end).format('DD/MM/YYYY')}
+                </p>
+                <p>
+                  <strong>เวลา:</strong>{' '}
+                  {moment(selectedEvent.start).format('HH:mm')} -{' '}
+                  {moment(selectedEvent.end).format('HH:mm')}
+                </p>
+                
+              </div>
+            )}
+          </Modal.Body>
   <Modal.Footer>
     <Button variant="secondary" onClick={handleCloseModal}>
       ปิด
